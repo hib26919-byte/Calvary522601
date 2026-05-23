@@ -1,0 +1,32 @@
+.story-timeline { position: relative; margin-top: 32px; display: grid; gap: 18px; }
+.story-timeline__item { display: grid; grid-template-columns: 120px 1fr; gap: 20px; padding: 22px; background: var(--surface-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid rgba(75,22,140,0.1); border-left: 5px solid var(--color-secondary); }
+.story-timeline__item span { font-family: var(--font-heading); font-weight: 900; color: var(--color-primary); font-size: 1.25rem; }
+.story-timeline__item p { color: var(--color-text-body); line-height: 1.75; }
+.leader-profile { display: grid; grid-template-columns: 320px 1fr; gap: 48px; align-items: center; }
+.leader-profile__photo { aspect-ratio: 1; border-radius: var(--radius-lg); background: var(--gradient-hero); box-shadow: var(--shadow-lg); overflow: hidden; display: grid; place-items: center; color: var(--color-secondary-light); font-size: 80px; }
+.leader-profile__photo img { width: 100%; height: 100%; object-fit: cover; }
+.eyebrow { display: inline-block; color: var(--color-secondary); font-family: var(--font-ui); font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; margin-bottom: 12px; }
+.leader-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.leader-duo article {
+  padding: 28px;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(75,22,140,0.1);
+  border-top: 5px solid var(--color-secondary);
+  transition: transform var(--transition-bounce), box-shadow var(--transition-base);
+}
+.leader-duo article:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.leader-duo h2 {
+  color: var(--color-primary-dark);
+  margin-bottom: 12px;
+}
+.leader-duo p {
+  color: var(--color-text-body);
+  line-height: 1.8;
+}
+@media (max-width: 760px) { .story-timeline__item, .leader-profile { grid-template-columns: 1fr; } .leader-profile__photo { width: min(100%, 320px); } }
+@media (max-width: 760px) { .leader-duo { grid-template-columns: 1fr; } }

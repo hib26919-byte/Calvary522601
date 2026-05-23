@@ -1,0 +1,7 @@
+.lang-switch { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; background: transparent; }
+.lang-label { font-family: var(--font-ui); font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.55); transition: color var(--transition-fast); letter-spacing: 0; }
+.lang-label.active { color: var(--color-white); }
+.lang-track { width: 44px; height: 24px; border-radius: 12px; background: rgba(255,255,255,0.22); position: relative; transition: background var(--transition-base); border: 1.5px solid rgba(255,255,255,0.3); }
+.lang-track.te { background: var(--color-secondary); border-color: var(--color-secondary-light); }
+.lang-thumb { width: 18px; height: 18px; border-radius: 50%; background: white; position: absolute; top: 2px; left: 3px; transition: transform var(--transition-bounce); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.lang-track.te .lang-thumb { transform: translateX(20px); }

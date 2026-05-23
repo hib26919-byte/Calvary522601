@@ -1,0 +1,112 @@
+.vision-story {
+  padding: var(--spacing-3xl) 0;
+  background:
+    linear-gradient(180deg, white, var(--color-off-white) 58%, var(--color-lavender-mist));
+  overflow: hidden;
+}
+.vision-story__wrap {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 58px;
+  align-items: center;
+}
+.vision-story__frames {
+  min-height: 560px;
+  position: relative;
+}
+.vision-story__frame {
+  position: absolute;
+  overflow: hidden;
+  background: white;
+  border: 10px solid white;
+  box-shadow: 0 28px 70px rgba(30,10,61,0.24);
+}
+.vision-story__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vision-story__frame--one {
+  inset: 0 60px 110px 0;
+  clip-path: polygon(0 0, 88% 0, 100% 12%, 100% 100%, 10% 100%, 0 88%);
+}
+.vision-story__frame--two {
+  width: 260px;
+  height: 300px;
+  right: 0;
+  bottom: 0;
+  clip-path: polygon(12% 0, 100% 0, 100% 86%, 88% 100%, 0 100%, 0 14%);
+}
+.vision-story__year {
+  position: absolute;
+  left: 26px;
+  bottom: 58px;
+  width: 126px;
+  height: 126px;
+  border-radius: 50%;
+  background: var(--gradient-lavender);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 900;
+  border: 7px solid white;
+  box-shadow: var(--shadow-lg);
+}
+.vision-story__eyebrow {
+  color: var(--color-secondary);
+  font-family: var(--font-ui);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.vision-story h2 {
+  margin: 12px 0 22px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  color: var(--color-primary-dark);
+}
+.vision-story__vision {
+  margin: 24px 0;
+  padding: 20px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid rgba(75,22,140,0.1);
+  border-left: 5px solid var(--color-secondary);
+  box-shadow: var(--shadow-sm);
+}
+.vision-story__vision strong {
+  display: block;
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  margin-bottom: 8px;
+}
+.vision-story__vision p {
+  color: var(--color-text-body);
+  line-height: 1.8;
+}
+.vision-story__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-dark);
+  color: white;
+  font-family: var(--font-ui);
+  font-weight: 900;
+}
+.vision-story__link:hover {
+  color: white;
+  background: var(--color-secondary);
+}
+@media (max-width: 900px) {
+  .vision-story__wrap {
+    grid-template-columns: 1fr;
+  }
+  .vision-story__frames {
+    min-height: 420px;
+  }
+}

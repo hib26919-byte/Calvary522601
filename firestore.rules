@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /siteContent/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+    match /gallery/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+    match /festivalBanners/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+    match /chatbotKnowledge/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+    match /analytics/{doc} {
+      allow read: if request.auth != null && isAdmin();
+      allow write: if true;
+    }
+    match /contactMessages/{doc} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null && isAdmin();
+    }
+    match /notifications/{doc} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null && isAdmin();
+    }
+    match /adminUsers/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /admins/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+  }
+}

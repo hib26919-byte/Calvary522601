@@ -1,0 +1,12 @@
+.anim-logo { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform var(--transition-bounce); cursor: pointer; }
+.anim-logo:hover { transform: scale(1.08); }
+.anim-logo__shimmer { border-radius: 50%; background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.12) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; position: absolute; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.anim-logo__glow-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid var(--color-secondary); animation: logo-glow 3s ease-in-out infinite; pointer-events: none; }
+@keyframes logo-glow {
+  0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(191,169,255,0.3); }
+  50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 0 8px rgba(191,169,255,0); }
+}
+.anim-logo__img { border-radius: 50%; object-fit: contain; opacity: 0; transition: opacity var(--transition-base); position: relative; z-index: 1; }
+.anim-logo__img--loaded { opacity: 1; }
+.anim-logo__fallback { display: flex; align-items: center; justify-content: center; color: var(--color-secondary); font-family: serif; line-height: 1; border-radius: 50%; background: var(--color-primary); font-weight: 900; }

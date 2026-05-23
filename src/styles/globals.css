@@ -132,4 +132,76 @@ button { border: 0; }
   .section { padding: var(--spacing-2xl) 0; }
   body { padding-bottom: 80px; }
   .admin-form-grid { grid-template-columns: 1fr; }
+  .page-hero {
+    min-height: 58vh;
+    padding: 118px 0 56px;
+    place-items: end start;
+  }
+  .page-hero__image {
+    clip-path: none;
+    object-position: center;
+    animation: mobile-page-image 13s ease-in-out infinite;
+  }
+  .page-hero::after {
+    background:
+      linear-gradient(180deg, rgba(30,10,61,0.35), rgba(30,10,61,0.82)),
+      linear-gradient(90deg, rgba(30,10,61,0.75), rgba(75,22,140,0.26));
+  }
+  .page-hero__content {
+    width: min(100% - 28px, 560px);
+    animation: mobile-page-copy 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .page-hero h1 {
+    font-size: clamp(1.85rem, 9vw, 3rem);
+    line-height: 1.08;
+  }
+  .page-hero p {
+    margin-top: 10px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .page-hero__content::before {
+    width: 52px;
+    height: 4px;
+    margin-bottom: 14px;
+  }
+  .page-hero__content::after {
+    display: none;
+  }
+  .main-content > main > .section,
+  .main-content > main > section:not(.hero):not(.page-hero) {
+    animation: mobile-section-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .main-content > main > .section:nth-of-type(2),
+  .main-content > main > section:nth-of-type(2) {
+    animation-delay: 0.08s;
+  }
+  .main-content > main > .section:nth-of-type(3),
+  .main-content > main > section:nth-of-type(3) {
+    animation-delay: 0.14s;
+  }
+}
+
+@keyframes mobile-page-copy {
+  from { opacity: 0; transform: translateY(26px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mobile-page-image {
+  0%, 100% { transform: scale(1.02); }
+  50% { transform: scale(1.1) translate3d(-1.5%, -1%, 0); }
+}
+
+@keyframes mobile-section-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-hero__image,
+  .page-hero__content,
+  .main-content > main > .section,
+  .main-content > main > section:not(.hero):not(.page-hero) {
+    animation: none;
+  }
 }

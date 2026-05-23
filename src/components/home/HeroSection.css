@@ -257,15 +257,97 @@
 }
 @media (max-width: 760px) {
   .hero {
-    padding-top: 118px;
+    min-height: auto;
+    padding: 104px 0 84px;
+    align-items: start;
   }
+
+  .hero__layout {
+    width: min(100% - 20px, 560px);
+    gap: 18px;
+  }
+
+  .hero__badge {
+    max-width: 100%;
+    padding: 6px 10px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    white-space: normal;
+    justify-content: center;
+  }
+
+  .hero__kicker {
+    margin: 10px 0 6px;
+    font-size: 0.72rem;
+  }
+
+  .hero__title {
+    font-size: clamp(1.74rem, 8.4vw, 2.65rem);
+    line-height: 1.08;
+  }
+
+  .hero__subtitle {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    max-width: 34rem;
+  }
+
+  .hero__actions {
+    margin-top: 16px;
+    gap: 10px;
+  }
+
+  .hero__cta {
+    padding: 11px 18px;
+    font-size: 13px;
+  }
+
   .hero__single-image {
-    aspect-ratio: 4/3;
-    border-width: 8px;
+    width: calc(100vw - 18px);
+    max-width: 560px;
+    aspect-ratio: 3/4;
+    border-width: 6px;
+    border-radius: 8px;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 88% 100%, 0 100%);
+    box-shadow: 0 22px 54px rgba(0,0,0,0.34);
+    animation: mobile-hero-lift 0.9s cubic-bezier(0.22, 1, 0.36, 1) both 0.15s;
   }
+
+  .hero__single-image img {
+    object-position: center;
+    animation: hero-mobile-cinema 14s ease-in-out infinite;
+  }
+
   .hero__scripture-chip {
     left: 12px;
     bottom: 12px;
-    padding: 12px;
+    max-width: calc(100% - 24px);
+    padding: 9px 10px;
+    border-left-width: 3px;
+    font-size: 0.78rem;
+  }
+
+  .hero__mission {
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+}
+
+@keyframes mobile-hero-lift {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes hero-mobile-cinema {
+  0%, 100% { transform: scale(1.02) translate3d(0, 0, 0); }
+  45% { transform: scale(1.1) translate3d(-1.5%, -1%, 0); }
+  70% { transform: scale(1.07) translate3d(1.2%, 0.8%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__single-image,
+  .hero__single-image img {
+    animation: none;
   }
 }

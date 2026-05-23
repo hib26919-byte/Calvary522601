@@ -95,9 +95,10 @@ export default function GalleryGrid({ category }) {
               >
                 <span className="gallery-tile__frame">
                   <img
-                    src={img.thumbURL || img.imageURL}
+                    src={img.imageURL || img.thumbURL}
                     alt={t(img, "caption") || "Ministry gallery"}
                     loading="lazy"
+                    decoding="async"
                   />
                 </span>
 

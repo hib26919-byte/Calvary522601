@@ -79,7 +79,7 @@ export default function AdminGallery() {
           <div className="admin-form-group admin-form-group--full"><label>About Image English</label><textarea className="admin-textarea" rows={3} value={uploadMeta.about_en} onChange={(e) => setUploadMeta((p) => ({ ...p, about_en: e.target.value }))} /></div>
           <div className="admin-form-group admin-form-group--full"><label>About Image Telugu</label><textarea className="admin-textarea" rows={3} lang="te" value={uploadMeta.about_te} onChange={(e) => setUploadMeta((p) => ({ ...p, about_te: e.target.value }))} /></div>
         </div>
-        <p style={{ color: "var(--color-text-muted)", margin: "12px 0" }}>Images are compressed below 500 KB before upload while preserving clarity as much as possible.</p>
+        <p style={{ color: "var(--color-text-muted)", margin: "12px 0" }}>Images are uploaded in HD quality up to about 2.5 MB while preserving clarity.</p>
       </div>
       <div className="admin-upload-zone" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); handleFileDrop(e.dataTransfer.files); }} onClick={() => document.getElementById("gallery-file-input").click()}>
         <input id="gallery-file-input" type="file" accept="image/*" multiple hidden onChange={(e) => handleFileDrop(e.target.files)} />
@@ -92,7 +92,7 @@ export default function AdminGallery() {
       <div className="admin-gallery-grid">
         {filteredImages.map((img) => (
           <div key={img.id} className="admin-gallery-item">
-            <img src={img.thumbURL || img.imageURL} alt={img.caption_en || "Gallery"} />
+            <img src={img.imageURL || img.thumbURL} alt={img.caption_en || "Gallery"} />
             <div className="admin-gallery-item__body">
               <strong>{CATEGORIES.find((c) => c.value === img.category)?.label || img.category}</strong>
               <p>{img.caption_en || "No caption"}</p>

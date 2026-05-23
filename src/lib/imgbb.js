@@ -53,13 +53,13 @@ export function validateImageFile(file) {
   return true;
 }
 
-export async function compressImageFile(file, maxBytes = 500 * 1024) {
+export async function compressImageFile(file, maxBytes = 2500 * 1024) {
   if (!file || !file.type?.startsWith("image/")) return file;
   if (file.type === "image/gif" || file.type === "image/svg+xml") return file;
 
   const bitmap = await createImageBitmap(file);
-  let maxDimension = 1800;
-  let quality = 0.9;
+  let maxDimension = 2560;
+  let quality = 0.94;
   let blob = file;
 
   for (let attempt = 0; attempt < 10; attempt++) {
@@ -75,9 +75,9 @@ export async function compressImageFile(file, maxBytes = 500 * 1024) {
     ctx.drawImage(bitmap, 0, 0, width, height);
     blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
 
-    if (blob.size <= maxBytes || (quality <= 0.62 && maxDimension <= 1200)) break;
-    if (quality > 0.68) quality -= 0.07;
-    else maxDimension -= 160;
+    if (blob.size <= maxBytes || (quality <= 0.76 && maxDimension <= 1800)) break;
+    if (quality > 0.82) quality -= 0.04;
+    else maxDimension -= 180;
   }
 
   return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });

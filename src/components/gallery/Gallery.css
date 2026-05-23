@@ -81,37 +81,56 @@
 
 .gallery-grid {
   columns: 3 280px;
-  column-gap: 22px;
+  column-gap: 24px;
 }
 
 .gallery-tile {
   width: 100%;
   display: block;
   break-inside: avoid;
-  margin: 0 0 22px;
-  background: var(--surface-card);
-  border-radius: var(--radius-lg);
+  margin: 0 0 24px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.98), rgba(244,240,252,0.94)),
+    var(--surface-card);
+  border-radius: 8px;
   cursor: pointer;
   text-align: left;
   overflow: hidden;
-  box-shadow: 0 16px 38px rgba(30,10,61,0.11);
-  border: 1px solid rgba(75,22,140,0.1);
-  transition: 0.3s ease;
+  box-shadow:
+    0 24px 56px rgba(30,10,61,0.14),
+    inset 0 0 0 1px rgba(255,255,255,0.82);
+  border: 1px solid rgba(75,22,140,0.16);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
 .gallery-tile:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  border-color: rgba(139,92,246,0.34);
+  box-shadow:
+    0 30px 70px rgba(30,10,61,0.18),
+    0 0 0 1px rgba(191,169,255,0.22);
 }
 
 .gallery-tile__frame {
+  position: relative;
   display: block;
   overflow: hidden;
+  width: 100%;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.92), rgba(191,169,255,0.22)),
+    #f5f5f5;
+  padding: 8px;
 }
 
-.gallery-tile__frame {
-  width: 100%;
-  overflow: hidden;
-  background: #f5f5f5;
+.gallery-tile__frame::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.54),
+    inset 0 -70px 80px rgba(30,10,61,0.16);
 }
 
 .gallery-tile__frame img {
@@ -122,11 +141,13 @@
   image-rendering: auto;
   backface-visibility: hidden;
   transform: translateZ(0);
-  transition: transform 0.35s ease;
+  border-radius: 5px;
+  transition: transform 0.5s ease, filter 0.5s ease;
+  filter: saturate(1.06) contrast(1.03);
 }
 
 .gallery-tile:hover .gallery-tile__frame img {
-  transform: scale(1.015);
+  transform: scale(1.035);
 }
 .gallery-tile {
   overflow: hidden;
@@ -140,7 +161,7 @@
   display: grid;
   gap: 6px;
   padding: 16px 18px 18px;
-  border-top: 4px solid var(--color-secondary);
+  border-top: 1px solid rgba(139,92,246,0.2);
 }
 
 .gallery-tile__content strong {
@@ -264,6 +285,23 @@
 @media (max-width: 640px) {
   .gallery-grid {
     columns: 1;
+    column-gap: 0;
+  }
+
+  .gallery-tile {
+    margin-bottom: 18px;
+  }
+
+  .gallery-tile__frame {
+    padding: 6px;
+  }
+
+  .gallery-tile__frame::before {
+    inset: 6px;
+  }
+
+  .gallery-tile__frame img {
+    width: 100%;
   }
 
   .lightbox__nav--prev {

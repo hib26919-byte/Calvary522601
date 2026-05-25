@@ -49,6 +49,10 @@ export default function FestivalBanner() {
           {t(banner, "title") && <h2>{t(banner, "title")}</h2>}
           {t(banner, "subtitle") && <p>{t(banner, "subtitle")}</p>}
           <button className="festival-banner__cta" onClick={handleClose}>{ts("banner_close")} →</button>
+          <div className="festival-banner__credit">
+            <span>Website made by <strong>WayzenTech</strong></span>
+            <a href="tel:+919398724704">Contact 9398724704</a>
+          </div>
         </div>
       </div>
     </div>

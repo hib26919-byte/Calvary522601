@@ -13,3 +13,13 @@
 .festival-banner__content p { color: var(--color-text-body); line-height: 1.6; margin-bottom: 24px; }
 .festival-banner__cta { background: var(--gradient-hero); color: white; padding: 12px 32px; border-radius: var(--radius-full); font-family: var(--font-ui); font-size: 14px; font-weight: 900; cursor: pointer; transition: all var(--transition-bounce); }
 .festival-banner__cta:hover { transform: translateY(-2px) scale(1.03); box-shadow: var(--shadow-md); }
+.festival-banner__credit { margin-top: 18px; padding-top: 14px; border-top: 1px solid #eee7f5; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--color-text-muted); font-family: var(--font-ui); font-size: 12px; }
+.festival-banner__credit strong { color: var(--color-primary); }
+.festival-banner__credit a { color: var(--color-secondary); font-weight: 900; }
+@media (max-width: 560px) {
+  .festival-banner { padding: 12px; }
+  .festival-banner__modal { border-radius: var(--radius-lg); }
+  .festival-banner__img-wrap { max-height: 260px; }
+  .festival-banner__img { height: 260px; }
+  .festival-banner__content { padding: 18px 20px 24px; }
+}

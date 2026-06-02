@@ -6,6 +6,7 @@ import { trackPageView } from "../lib/analytics";
 import { DEFAULT_IMAGES, DEFAULT_MINISTRY_CONTENT } from "../lib/defaultContent";
 import "./ContactPage.css";
 import MinistryArtSection from "../components/common/MinistryArtSection";
+import InnerPageHero from "../components/common/InnerPageHero";
 
 export default function ContactPage() {
   const { contactPage, globalSettings } = useContent();
@@ -19,13 +20,14 @@ export default function ContactPage() {
 
   return (
     <main>
-      <section className="page-hero">
-        <img src={contactPage?.heroImageURL || DEFAULT_IMAGES.prayer} alt="" className="page-hero__image" />
-        <div className="page-hero__content">
-          <h1>{t(contactPage, "heroTitle") || ts("contact_label")}</h1>
-          <p>{t(contactPage, "heroSubtitle") || (language === "te" ? "ప్రార్థన, సందర్శన, లేదా పరిచర్య గురించి మాట్లాడడానికి మమ్మల్ని సంప్రదించండి." : "Reach out for prayer, a visit, or a conversation about the ministry.")}</p>
-        </div>
-      </section>
+      <InnerPageHero
+        eyebrow={language === "te" ? "సంప్రదింపు" : "Contact"}
+        title={t(contactPage, "heroTitle") || ts("contact_label")}
+        subtitle={t(contactPage, "heroSubtitle") || (language === "te" ? "ప్రార్థన, సందర్శన, లేదా పరిచర్య గురించి మాట్లాడడానికి మమ్మల్ని సంప్రదించండి." : "Reach out for prayer, a visit, or a conversation about the ministry.")}
+        images={contactPage?.heroImages}
+        fallbackImage={contactPage?.heroImageURL || DEFAULT_IMAGES.prayer}
+        alt="Prayer and ministry contact"
+      />
 
       <section className="contact-hub">
         <div className="contact-hub__grid">

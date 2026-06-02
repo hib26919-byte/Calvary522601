@@ -19,6 +19,7 @@ const TribalOutreachPage = lazy(() => import("./pages/TribalOutreachPage"));
 const ChildrensMinistryPage = lazy(() => import("./pages/ChildrensMinistryPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AdminLogin = lazy(() => import("./admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
@@ -60,6 +61,8 @@ export default function App() {
                 <Route path="/childrens-ministry" element={<PublicLayout><ChildrensMinistryPage /></PublicLayout>} />
                 <Route path="/gallery" element={<PublicLayout><GalleryPage /></PublicLayout>} />
                 <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+                <Route path="/portfolio/kranthi" element={<PublicLayout><PortfolioPage slug="kranthi" /></PublicLayout>} />
+                <Route path="/portfolio/prasanth" element={<PublicLayout><PortfolioPage slug="prasanth" /></PublicLayout>} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}>
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />

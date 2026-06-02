@@ -1,52 +1,163 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useContent } from "../../context/ContentContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { buildLeaderProfiles } from "./leadershipProfiles";
 import "./LeaderSections.css";
 
 export default function LeaderSections() {
   const { aboutPage } = useContent();
   const { language } = useLanguage();
-  const leaders = [
-    {
-      role: language === "te" ? "స్థాపక దర్శకుడు" : "Founder Director",
-      name: "A. Ravi (Father)",
-      title: "Ravi Children & Tribal Ministry",
-      years: "2000-2020",
-      photo: aboutPage?.founderPhotoURL,
-      description: language === "te"
-        ? "ఆంధ్రప్రదేశ్‌లో పిల్లలు మరియు గిరిజన సమాజాలకు అంకితభావం మరియు కరుణతో సేవ చేశారు. 2020లో కోవిడ్ సమయంలో మరణించి, విశ్వాసం మరియు సేవ యొక్క శాశ్వత వారసత్వాన్ని విడిచారు."
-        : "Faithfully served children and tribal communities across Andhra Pradesh with dedication and compassion. Passed away in 2020 during COVID, leaving a lasting legacy of faith and service."
-    },
-    {
-      role: language === "te" ? "ప్రస్తుత దర్శకుడు" : "Present Director",
-      name: "A.Prasanth (Son)",
-      title: "Calvary Prema Ministries",
-      years: "Graduate B.A",
-      photo: aboutPage?.leaderPhotoURL,
-      description: language === "te"
-        ? "తండ్రి దృష్టిని కొత్త లక్ష్యంతో కొనసాగిస్తున్నారు. 18 సంవత్సరాల వయస్సులో బాప్తిస్మము పొందారు. చర్చి పరిచర్య, గిరిజన సేవ మరియు పిల్లల పరిచర్య ద్వారా సమాజాలకు సేవ చేస్తున్నారు. నాయకత్వం మరియు తత్వశాస్త్ర జ్ఞానాన్ని బలపరచడానికి బైబిల్ శిక్షణను కోరుకుంటున్నారు."
-        : "Continuing his father's vision with renewed purpose. Took baptism at age 18, growing spiritually and serving communities through church ministry, tribal outreach, and children's ministry. Pursuing Bible training to strengthen leadership and theological knowledge."
-    }
-  ];
+  const [activeProfile, setActiveProfile] = useState(null);
+
+  const leaders = useMemo(
+    () => buildLeaderProfiles(aboutPage || {}, language),
+    [aboutPage, language]
+  );
 
   return (
-    <section className="leader-sections">
+    <section className="leader-sections" aria-labelledby="leadership-title">
       <div className="leader-sections__inner">
-        {leaders.map((leader, index) => (
-          <article className="leader-section-card" key={leader.name} style={{ "--delay": `${index * 120}ms` }}>
-            <div className="leader-section-card__photo">
-              {leader.photo ? <img src={leader.photo} alt={leader.name} /> : <span>✚</span>}
-            </div>
-            <div>
-              <span className="leader-section-card__role">{leader.role}</span>
-              <h2>{leader.name}</h2>
-              <h3>{leader.title}</h3>
-              <strong>{leader.years}</strong>
-              <p>{leader.description}</p>
-            </div>
-          </article>
-        ))}
+        <div className="leader-sections__header">
+          <span>Leadership</span>
+          <h2 id="leadership-title">A Family Carrying the Ministry Forward</h2>
+          <p>Meet the ministry leaders and view each person's own portfolio.</p>
+        </div>
+
+        <div className="leader-sections__grid" aria-label="Leadership profiles">
+          {leaders.map((leader) => (
+            <article className="leader-card" key={leader.key}>
+              <LeaderPhoto photoUrl={leader.photoUrl} name={leader.name} />
+              <div className="leader-card__body">
+                <span className="leader-card__role">{leader.role}</span>
+                <h3>{leader.name}</h3>
+                <p className="leader-card__title">{leader.title}</p>
+                {leader.years && <strong>{leader.years}</strong>}
+              </div>
+              <button
+                type="button"
+                className="leader-card__button"
+                onClick={() => setActiveProfile(leader)}
+              >
+                View Portfolio →
+              </button>
+            </article>
+          ))}
+        </div>
       </div>
+
+      {activeProfile && (
+        <LeaderPortfolioModal
+          profile={activeProfile}
+          onClose={() => setActiveProfile(null)}
+        />
+      )}
     </section>
+  );
+}
+
+function LeaderPhoto({ photoUrl, name }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [photoUrl]);
+
+  if (!photoUrl || failed) {
+    return (
+      <div className="leader-photo leader-photo--placeholder" aria-label={`${name} photo placeholder`}>
+        <span aria-hidden="true">✝</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="leader-photo">
+      <img src={photoUrl} alt={name} loading="lazy" onError={() => setFailed(true)} />
+    </div>
+  );
+}
+
+function LeaderPortfolioModal({ profile, onClose }) {
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    document.body.classList.add("leader-modal-open");
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.classList.remove("leader-modal-open");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="leader-modal"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className="leader-modal__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`leader-modal-title-${profile.key}`}
+      >
+        <button type="button" className="leader-modal__close" onClick={onClose} aria-label="Close portfolio">
+          X
+        </button>
+
+        <div className="leader-modal__intro">
+          <LeaderPhoto photoUrl={profile.photoUrl} name={profile.name} />
+          <div>
+            <span>{profile.role}</span>
+            <h3 id={`leader-modal-title-${profile.key}`}>{profile.name}</h3>
+            <p className="leader-modal__title">{profile.title}</p>
+            <p>{profile.bio}</p>
+          </div>
+        </div>
+
+        <div className="leader-modal__gallery" aria-label={`${profile.name} photo gallery`}>
+          {profile.galleryImages.length > 0 ? (
+            profile.galleryImages.map((image) => (
+              <PortfolioImage key={image.id} image={image} name={profile.name} />
+            ))
+          ) : (
+            <div className="leader-modal__empty">
+              <span aria-hidden="true">✝</span>
+              <p>Portfolio photos will appear here after upload.</p>
+            </div>
+          )}
+        </div>
+
+        {profile.portfolioPath && (
+          <Link className="leader-modal__page-link" to={profile.portfolioPath} onClick={onClose}>
+            Open full portfolio →
+          </Link>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function PortfolioImage({ image, name }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div className="leader-modal__image leader-modal__image--placeholder">
+        <span aria-hidden="true">✝</span>
+      </div>
+    );
+  }
+
+  return (
+    <figure className="leader-modal__image">
+      <img src={image.url} alt={image.alt || `${name} portfolio`} loading="lazy" onError={() => setFailed(true)} />
+    </figure>
   );
 }

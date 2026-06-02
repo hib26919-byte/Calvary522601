@@ -1,0 +1,102 @@
+.slideshow-manager {
+  display: grid;
+  gap: 14px;
+}
+
+.slideshow-manager__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.slideshow-manager__head label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.slideshow-manager__head p,
+.slideshow-manager__empty {
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.slideshow-manager__add {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(260px, 1fr);
+  gap: 14px;
+}
+
+.slideshow-manager__add .admin-upload-zone {
+  padding: 24px 16px;
+}
+
+.slideshow-manager__add .admin-upload-zone.is-busy {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.slideshow-manager__url-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.slideshow-manager__list {
+  display: grid;
+  gap: 12px;
+}
+
+.slideshow-manager__item {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(201,206,216,0.82);
+  background: rgba(255,255,255,0.78);
+}
+
+.slideshow-manager__item img {
+  width: 116px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--color-light-blue);
+}
+
+.slideshow-manager__fields {
+  display: grid;
+  gap: 8px;
+}
+
+.slideshow-manager__actions {
+  display: grid;
+  gap: 7px;
+}
+
+.slideshow-manager__error {
+  color: var(--color-accent-red-dark);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .slideshow-manager__add,
+  .slideshow-manager__item {
+    grid-template-columns: 1fr;
+  }
+
+  .slideshow-manager__url-row,
+  .slideshow-manager__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .slideshow-manager__item img {
+    width: 100%;
+  }
+}

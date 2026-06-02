@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { DEFAULT_IMAGES, DEFAULT_MINISTRY_CONTENT } from "../../lib/defaultContent";
+import PageImageSlideshow from "../common/PageImageSlideshow";
 import "./HeroSection.css";
 
 export default function HeroSection({ data }) {
   const { t, ts, language } = useLanguage();
   const [loaded, setLoaded] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     const id = setTimeout(() => setLoaded(true), 100);
@@ -44,9 +44,15 @@ export default function HeroSection({ data }) {
           </div>
         </div>
 
-        <div className={`hero__single-image ${imageFailed ? "hero__single-image--fallback" : ""}`}>
-          {!imageFailed && <img src={bgImage} alt="" onError={() => setImageFailed(true)} />}
-          <div className="hero__scripture-chip">
+        <div className="hero__single-image">
+          <PageImageSlideshow
+            images={data?.heroImages}
+            fallbackImage={bgImage}
+            alt="Calvary Prema Ministries"
+            frameStyle="modern"
+            aspectRatio="var(--hero-slideshow-aspect, 16 / 8)"
+          />
+          <div className="hero__scripture-note">
             <strong>{DEFAULT_MINISTRY_CONTENT.psalm_ref}</strong>
             <span>{language === "te" ? DEFAULT_MINISTRY_CONTENT.psalm_te : "The Lord is my strength and my shield."}</span>
           </div>

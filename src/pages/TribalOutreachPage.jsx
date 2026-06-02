@@ -6,6 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { trackPageView } from "../lib/analytics";
 import { DEFAULT_IMAGES, DEFAULT_MINISTRY_CONTENT } from "../lib/defaultContent";
 import MinistryArtSection from "../components/common/MinistryArtSection";
+import InnerPageHero from "../components/common/InnerPageHero";
 
 export default function TribalOutreachPage() {
   const { tribalPage } = useContent();
@@ -13,7 +14,14 @@ export default function TribalOutreachPage() {
   useEffect(() => { trackPageView("tribal"); }, []);
   return (
     <main>
-      <section className="page-hero"><img src={tribalPage?.heroImageURL || DEFAULT_IMAGES.tribal} alt="" className="page-hero__image" /><div className="page-hero__content"><h1>{t(tribalPage, "heroTitle") || (language === "te" ? "గిరిజన సేవ" : "Tribal Outreach")}</h1><p>{t(tribalPage, "heroSubtitle") || (language === "te" ? "మారుమూల గ్రామాలకు క్రీస్తు ప్రేమను తీసుకెళ్లడం." : "Carrying Christ's love to remote villages with prayer, guidance, and compassionate support.")}</p></div></section>
+      <InnerPageHero
+        eyebrow={language === "te" ? "గ్రామ సేవ" : "Village Outreach"}
+        title={t(tribalPage, "heroTitle") || (language === "te" ? "గిరిజన సేవ" : "Tribal Outreach")}
+        subtitle={t(tribalPage, "heroSubtitle") || (language === "te" ? "మారుమూల గ్రామాలకు క్రీస్తు ప్రేమను తీసుకెళ్లడం." : "Carrying Christ's love to remote villages with prayer, guidance, and compassionate support.")}
+        images={tribalPage?.heroImages}
+        fallbackImage={tribalPage?.heroImageURL || DEFAULT_IMAGES.tribal}
+        alt="Tribal outreach ministry"
+      />
       <section className="section"><div className="container"><h2 className="section-title">{language === "te" ? "ఆశతో కూడిన సమీపం" : "Presence That Brings Hope"}</h2><div className="rich-content" dangerouslySetInnerHTML={{ __html: t(tribalPage, "description") || `<p>${language === "te" ? DEFAULT_MINISTRY_CONTENT.mission_te : DEFAULT_MINISTRY_CONTENT.mission_en}</p><p>${language === "te" ? DEFAULT_MINISTRY_CONTENT.vision_te : DEFAULT_MINISTRY_CONTENT.vision_en}</p>` }} /></div></section>
       <MinistryArtSection
         title={language === "te" ? "గిరిజన సమాజాల మధ్య క్రీస్తు ప్రేమ" : "Christ's Love Among Tribal Communities"}

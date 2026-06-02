@@ -4,6 +4,7 @@ import { db } from "../../lib/firebase";
 import { uploadToImgBB, validateImageFile } from "../../lib/imgbb";
 import ImageUploader from "../components/ImageUploader";
 import RichTextEditor from "../components/RichTextEditor";
+import SlideshowManager from "../components/SlideshowManager";
 
 const PAGE_TABS = [
   { id: "homePage", label: "Home" },
@@ -33,6 +34,7 @@ export default function AdminPages() {
   }
 
   const update = (field, value) => setPageData((prev) => ({ ...prev, [field]: value }));
+  const updateFields = (fields) => setPageData((prev) => ({ ...prev, ...fields }));
 
   async function savePage() {
     setSaving(true);
@@ -53,10 +55,10 @@ export default function AdminPages() {
     setPageData({});
   }
 
-  async function handleHeroImageUpload(file) {
+  async function uploadImageField(file, field, name, extraFields = {}) {
     validateImageFile(file);
-    const result = await uploadToImgBB(file, `${activeTab}_hero`);
-    update("heroImageURL", result.url);
+    const result = await uploadToImgBB(file, name);
+    updateFields({ [field]: result.url, ...extraFields });
   }
 
   async function uploadPageGalleryImage(file) {
@@ -86,8 +88,23 @@ export default function AdminPages() {
 
   return (
     <div>
-      <div className="admin-section-header"><h2>Page Content Manager</h2><p>Edit hero content, body copy, contact details, and scripture in English and Telugu.</p></div>
-      <div className="admin-tabs">{PAGE_TABS.map((tab) => <button key={tab.id} className={`admin-tab ${activeTab === tab.id ? "active" : ""}`} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}</div>
+      <div className="admin-section-header">
+        <h2>Page Content Manager</h2>
+        <p>Edit hero content, slideshow images, body copy, contact details, and scripture in English and Telugu.</p>
+      </div>
+
+      <div className="admin-tabs">
+        {PAGE_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            className={`admin-tab ${activeTab === tab.id ? "active" : ""}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {loading ? <div className="admin-loading">Loading content...</div> : (
         <>
           <div className="admin-card">
@@ -100,25 +117,204 @@ export default function AdminPages() {
               <Input label="CTA Text (English)" value={pageData.heroCTAText_en} onChange={(v) => update("heroCTAText_en", v)} />
               <Input label="CTA Text (Telugu)" value={pageData.heroCTAText_te} onChange={(v) => update("heroCTAText_te", v)} lang="te" />
               <Input label="CTA Link" value={pageData.heroCTALink} onChange={(v) => update("heroCTALink", v)} />
-              <div className="admin-form-group admin-form-group--full"><label>Hero Background Image</label><ImageUploader currentUrl={pageData.heroImageURL} onUpload={handleHeroImageUpload} onUrlChange={(url) => update("heroImageURL", url)} label="Upload Hero Image" /></div>
-              <div className="admin-form-group admin-form-group--full"><label>Jesus Artwork Image URL (optional)</label><ImageUploader currentUrl={pageData.jesusImageURL} onUpload={async (file) => { validateImageFile(file); const result = await uploadToImgBB(file, `${activeTab}_jesus_art`); update("jesusImageURL", result.url); }} onUrlChange={(url) => update("jesusImageURL", url)} label="Upload Jesus Ministry Artwork" /></div>
+
+              <div className="admin-form-group admin-form-group--full">
+                <label>Fallback Hero Image</label>
+                <ImageUploader
+                  currentUrl={pageData.heroImageURL}
+                  onUpload={(file) => uploadImageField(file, "heroImageURL", `${activeTab}_hero`)}
+                  onUrlChange={(url) => update("heroImageURL", url)}
+                  label="Upload Hero Image"
+                />
+              </div>
+
+              <div className="admin-form-group admin-form-group--full">
+                <SlideshowManager
+                  label="Hero Slideshow Images"
+                  images={pageData.heroImages}
+                  onChange={(images) => update("heroImages", images)}
+                  uploadName={`${activeTab}_hero_slide`}
+                  maxImages={10}
+                />
+              </div>
+
+              <div className="admin-form-group admin-form-group--full">
+                <label>Jesus Artwork Image URL (optional)</label>
+                <ImageUploader
+                  currentUrl={pageData.jesusImageURL}
+                  onUpload={(file) => uploadImageField(file, "jesusImageURL", `${activeTab}_jesus_art`)}
+                  onUrlChange={(url) => update("jesusImageURL", url)}
+                  label="Upload Jesus Ministry Artwork"
+                />
+              </div>
             </div>
           </div>
-          {(activeTab === "aboutPage" || activeTab === "tribalPage" || activeTab === "childrensPage") && <div className="admin-card"><h3 className="admin-card__title">Page Body Content</h3><div className="admin-form-group admin-form-group--full"><label>Body Content (English)</label><RichTextEditor value={pageData.storyBody_en || pageData.description_en || ""} onChange={(v) => update(activeTab === "aboutPage" ? "storyBody_en" : "description_en", v)} /></div><div className="admin-form-group admin-form-group--full"><label>Body Content (Telugu)</label><RichTextEditor value={pageData.storyBody_te || pageData.description_te || ""} onChange={(v) => update(activeTab === "aboutPage" ? "storyBody_te" : "description_te", v)} /></div></div>}
-          {(activeTab === "tribalPage" || activeTab === "childrensPage") && <div className="admin-card"><h3 className="admin-card__title">Upload Gallery Image to This Ministry Section</h3><p style={{ color: "var(--color-text-muted)", marginBottom: 12 }}>This upload is automatically assigned to {activeTab === "tribalPage" ? "Tribal Outreach" : "Children's Ministry"} gallery category.</p><input className="admin-input" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadPageGalleryImage(e.target.files[0])} /></div>}
-          {activeTab === "aboutPage" && <div className="admin-card"><h3 className="admin-card__title">Leader Profile Photos</h3><div className="admin-form-grid"><div className="admin-form-group admin-form-group--full"><label>Founder Photo - A. Ravi</label><ImageUploader currentUrl={pageData.founderPhotoURL} onUpload={async (file) => { validateImageFile(file); const result = await uploadToImgBB(file, "founder_ravi"); update("founderPhotoURL", result.url); }} onUrlChange={(url) => update("founderPhotoURL", url)} label="Upload Founder Photo" /></div><div className="admin-form-group admin-form-group--full"><label>Present Leader Photo - A.Prasanth</label><ImageUploader currentUrl={pageData.leaderPhotoURL} onUpload={async (file) => { validateImageFile(file); const result = await uploadToImgBB(file, "leader_prasanth"); update("leaderPhotoURL", result.url); }} onUrlChange={(url) => update("leaderPhotoURL", url)} label="Upload Present Leader Photo" /></div></div></div>}
-          {activeTab === "homePage" && <div className="admin-card"><h3 className="admin-card__title">Scripture Verses</h3><div className="admin-form-grid"><Input label="Verse 1 Reference" value={pageData.verse1_reference} onChange={(v) => update("verse1_reference", v)} /><Area label="Verse 1 Text (English)" value={pageData.verse1_text_en} onChange={(v) => update("verse1_text_en", v)} /><Area label="Verse 1 Text (Telugu)" value={pageData.verse1_text_te} onChange={(v) => update("verse1_text_te", v)} lang="te" /><Input label="Verse 2 Reference" value={pageData.verse2_reference} onChange={(v) => update("verse2_reference", v)} /><Area label="Verse 2 Text (English)" value={pageData.verse2_text_en} onChange={(v) => update("verse2_text_en", v)} /><Area label="Verse 2 Text (Telugu)" value={pageData.verse2_text_te} onChange={(v) => update("verse2_text_te", v)} lang="te" /></div></div>}
-          {activeTab === "contactPage" && <div className="admin-card"><h3 className="admin-card__title">Contact Details</h3><div className="admin-form-grid"><Area label="Address (English)" value={pageData.address_en} onChange={(v) => update("address_en", v)} /><Area label="Address (Telugu)" value={pageData.address_te} onChange={(v) => update("address_te", v)} lang="te" /><Input label="Phone" value={pageData.phone} onChange={(v) => update("phone", v)} /><Input label="Email" value={pageData.email} onChange={(v) => update("email", v)} /><Input label="Map Embed URL" value={pageData.mapEmbedURL} onChange={(v) => update("mapEmbedURL", v)} /></div></div>}
-          <div className="admin-save-bar" style={{ display: "flex", gap: 10, alignItems: "center" }}><button className={`admin-btn admin-btn--primary ${saved ? "admin-btn--success" : ""}`} onClick={savePage} disabled={saving}>{saving ? "Saving..." : saved ? "Saved" : "Save Changes"}</button><button className="admin-btn admin-btn--danger" onClick={deletePageContent}>Clear Page Content</button></div>
+
+          {(activeTab === "aboutPage" || activeTab === "tribalPage" || activeTab === "childrensPage") && (
+            <div className="admin-card">
+              <h3 className="admin-card__title">Page Body Content</h3>
+              <div className="admin-form-group admin-form-group--full">
+                <label>Body Content (English)</label>
+                <RichTextEditor
+                  value={pageData.storyBody_en || pageData.description_en || ""}
+                  onChange={(v) => update(activeTab === "aboutPage" ? "storyBody_en" : "description_en", v)}
+                />
+              </div>
+              <div className="admin-form-group admin-form-group--full">
+                <label>Body Content (Telugu)</label>
+                <RichTextEditor
+                  value={pageData.storyBody_te || pageData.description_te || ""}
+                  onChange={(v) => update(activeTab === "aboutPage" ? "storyBody_te" : "description_te", v)}
+                />
+              </div>
+            </div>
+          )}
+
+          {(activeTab === "tribalPage" || activeTab === "childrensPage") && (
+            <div className="admin-card">
+              <h3 className="admin-card__title">Upload Gallery Image to This Ministry Section</h3>
+              <p style={{ color: "var(--color-text-muted)", marginBottom: 12 }}>
+                This upload is automatically assigned to {activeTab === "tribalPage" ? "Tribal Outreach" : "Children's Ministry"} gallery category.
+              </p>
+              <input className="admin-input" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadPageGalleryImage(e.target.files[0])} />
+            </div>
+          )}
+
+          {activeTab === "aboutPage" && (
+            <div className="admin-card">
+              <h3 className="admin-card__title">Leadership Profiles and Portfolios</h3>
+              <div className="admin-form-grid">
+                <LeaderEditor
+                  title="Founder - A. Ravi"
+                  prefix="founder"
+                  photoField="leaderPhotoURL"
+                  legacyPhotoField="founderPhotoURL"
+                  slideshowField="founderImages"
+                  pageData={pageData}
+                  update={update}
+                  updateFields={updateFields}
+                />
+                <LeaderEditor
+                  title="Son 1 - Anuparti Kranthi"
+                  prefix="son1"
+                  photoField="son1PhotoURL"
+                  slideshowField="son1Images"
+                  pageData={pageData}
+                  update={update}
+                  updateFields={updateFields}
+                />
+                <LeaderEditor
+                  title="Son 2 - A. Prasanth"
+                  prefix="son2"
+                  photoField="son2PhotoURL"
+                  slideshowField="son2Images"
+                  pageData={pageData}
+                  update={update}
+                  updateFields={updateFields}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "homePage" && (
+            <div className="admin-card">
+              <h3 className="admin-card__title">Scripture Verses</h3>
+              <div className="admin-form-grid">
+                <Input label="Verse 1 Reference" value={pageData.verse1_reference} onChange={(v) => update("verse1_reference", v)} />
+                <Area label="Verse 1 Text (English)" value={pageData.verse1_text_en} onChange={(v) => update("verse1_text_en", v)} />
+                <Area label="Verse 1 Text (Telugu)" value={pageData.verse1_text_te} onChange={(v) => update("verse1_text_te", v)} lang="te" />
+                <Input label="Verse 2 Reference" value={pageData.verse2_reference} onChange={(v) => update("verse2_reference", v)} />
+                <Area label="Verse 2 Text (English)" value={pageData.verse2_text_en} onChange={(v) => update("verse2_text_en", v)} />
+                <Area label="Verse 2 Text (Telugu)" value={pageData.verse2_text_te} onChange={(v) => update("verse2_text_te", v)} lang="te" />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "contactPage" && (
+            <div className="admin-card">
+              <h3 className="admin-card__title">Contact Details</h3>
+              <div className="admin-form-grid">
+                <Area label="Address (English)" value={pageData.address_en} onChange={(v) => update("address_en", v)} />
+                <Area label="Address (Telugu)" value={pageData.address_te} onChange={(v) => update("address_te", v)} lang="te" />
+                <Input label="Phone" value={pageData.phone} onChange={(v) => update("phone", v)} />
+                <Input label="Email" value={pageData.email} onChange={(v) => update("email", v)} />
+                <Input label="Map Embed URL" value={pageData.mapEmbedURL} onChange={(v) => update("mapEmbedURL", v)} />
+              </div>
+            </div>
+          )}
+
+          <div className="admin-save-bar" style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button className={`admin-btn admin-btn--primary ${saved ? "admin-btn--success" : ""}`} onClick={savePage} disabled={saving}>
+              {saving ? "Saving..." : saved ? "Saved" : "Save Changes"}
+            </button>
+            <button className="admin-btn admin-btn--danger" onClick={deletePageContent}>Clear Page Content</button>
+          </div>
         </>
       )}
     </div>
   );
 }
 
-function Input({ label, value = "", onChange, lang }) {
-  return <div className="admin-form-group"><label>{label}</label><input className="admin-input" value={value || ""} onChange={(e) => onChange(e.target.value)} lang={lang} /></div>;
+function LeaderEditor({ title, prefix, photoField, legacyPhotoField, slideshowField, pageData, update, updateFields }) {
+  async function uploadLeaderPhoto(file) {
+    validateImageFile(file);
+    const result = await uploadToImgBB(file, `${prefix}_leader_photo`);
+    updateFields({ [photoField]: result.url, ...(legacyPhotoField ? { [legacyPhotoField]: result.url } : {}) });
+  }
+
+  const currentPhoto = pageData[photoField] || (legacyPhotoField ? pageData[legacyPhotoField] : "");
+
+  return (
+    <div className="admin-form-group admin-form-group--full">
+      <h4 style={{ color: "var(--color-primary-dark)", margin: "8px 0" }}>{title}</h4>
+      <div className="admin-form-grid">
+        <Input label="Name (English)" value={pageData[`${prefix}Name_en`]} onChange={(v) => update(`${prefix}Name_en`, v)} />
+        <Input label="Name (Telugu)" value={pageData[`${prefix}Name_te`]} onChange={(v) => update(`${prefix}Name_te`, v)} lang="te" />
+        <Input label="Role (English)" value={pageData[`${prefix}Role_en`]} onChange={(v) => update(`${prefix}Role_en`, v)} />
+        <Input label="Role (Telugu)" value={pageData[`${prefix}Role_te`]} onChange={(v) => update(`${prefix}Role_te`, v)} lang="te" />
+        <Input label="Ministry Title (English)" value={pageData[`${prefix}Title_en`]} onChange={(v) => update(`${prefix}Title_en`, v)} />
+        <Input label="Ministry Title (Telugu)" value={pageData[`${prefix}Title_te`]} onChange={(v) => update(`${prefix}Title_te`, v)} lang="te" />
+        <Input label="Years / Credential (English)" value={pageData[`${prefix}Years_en`]} onChange={(v) => update(`${prefix}Years_en`, v)} />
+        <Input label="Years / Credential (Telugu)" value={pageData[`${prefix}Years_te`]} onChange={(v) => update(`${prefix}Years_te`, v)} lang="te" />
+        <Area label="Bio (English)" value={pageData[`${prefix}Bio_en`]} onChange={(v) => update(`${prefix}Bio_en`, v)} />
+        <Area label="Bio (Telugu)" value={pageData[`${prefix}Bio_te`]} onChange={(v) => update(`${prefix}Bio_te`, v)} lang="te" />
+        <div className="admin-form-group admin-form-group--full">
+          <label>Main Profile Photo</label>
+          <ImageUploader
+            currentUrl={currentPhoto}
+            onUpload={uploadLeaderPhoto}
+            onUrlChange={(url) => updateFields({ [photoField]: url, ...(legacyPhotoField ? { [legacyPhotoField]: url } : {}) })}
+            label={`Upload ${title} Photo`}
+          />
+        </div>
+        <div className="admin-form-group admin-form-group--full">
+          <SlideshowManager
+            label={`${title} Portfolio Slideshow`}
+            images={pageData[slideshowField]}
+            onChange={(images) => update(slideshowField, images)}
+            uploadName={`${prefix}_portfolio_slide`}
+            maxImages={10}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
+
+function Input({ label, value = "", onChange, lang }) {
+  return (
+    <div className="admin-form-group">
+      <label>{label}</label>
+      <input className="admin-input" value={value || ""} onChange={(e) => onChange(e.target.value)} lang={lang} />
+    </div>
+  );
+}
+
 function Area({ label, value = "", onChange, lang }) {
-  return <div className="admin-form-group admin-form-group--full"><label>{label}</label><textarea rows={3} className="admin-textarea" value={value || ""} onChange={(e) => onChange(e.target.value)} lang={lang} /></div>;
+  return (
+    <div className="admin-form-group admin-form-group--full">
+      <label>{label}</label>
+      <textarea rows={3} className="admin-textarea" value={value || ""} onChange={(e) => onChange(e.target.value)} lang={lang} />
+    </div>
+  );
 }

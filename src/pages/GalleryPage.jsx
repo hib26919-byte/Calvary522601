@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import GalleryGrid from "../components/gallery/GalleryGrid";
+import InnerPageHero from "../components/common/InnerPageHero";
 import { useLanguage } from "../context/LanguageContext";
 import { trackPageView } from "../lib/analytics";
+import { DEFAULT_IMAGES } from "../lib/defaultContent";
 
 export default function GalleryPage() {
   const { ts, language } = useLanguage();
@@ -12,17 +14,15 @@ export default function GalleryPage() {
 
   return (
     <main>
-      <section className="page-hero">
-        <div className="page-hero__content">
-          <h1>{ts("gallery_label")}</h1>
-
-          <p>
-            {language === "te"
-              ? "పరిచర్య క్షణాలు, ప్రార్థనలు, సమాజం, పిల్లలు మరియు సేవ."
-              : "Ministry moments from prayer, community, children, villages, and worship."}
-          </p>
-        </div>
-      </section>
+      <InnerPageHero
+        eyebrow={language === "te" ? "ఫోటోలు" : "Photo Stories"}
+        title={ts("gallery_label")}
+        subtitle={language === "te"
+          ? "పరిచర్య క్షణాలు, ప్రార్థనలు, సమాజం, పిల్లలు మరియు సేవ."
+          : "Ministry moments from prayer, community, children, villages, and worship."}
+        fallbackImage={DEFAULT_IMAGES.church}
+        alt="Calvary Prema gallery"
+      />
 
       <section className="section section--soft">
         <div className="container">

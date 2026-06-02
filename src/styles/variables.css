@@ -52,4 +52,22 @@
   --transition-base: 0.3s ease;
   --transition-slow: 0.6s ease;
   --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --pk-bg: #050C1F;
+  --pk-bg-2: #0A1530;
+  --pk-accent: #E85D04;
+  --pk-accent-2: #FF7A2F;
+  --pk-text: #FFFFFF;
+  --pk-text-muted: rgba(255,255,255,0.55);
+  --pk-border: rgba(232,93,4,0.25);
+  --pk-glow: 0 0 40px rgba(232,93,4,0.3);
+  --pp-bg: #FFFFFF;
+  --pp-bg-2: #F5F7FF;
+  --pp-accent: #10B981;
+  --pp-accent-2: #059669;
+  --pp-text: #0D1B3E;
+  --pp-text-muted: #6B7BA4;
+  --pp-border: rgba(16,185,129,0.25);
+  --pp-glow: 0 0 40px rgba(16,185,129,0.2);
+  --port-section-pad: clamp(80px, 10vw, 140px);
+  --port-container: 1280px;
 }

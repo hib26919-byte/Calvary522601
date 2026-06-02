@@ -1,0 +1,47 @@
+.pk-page {
+  --port-bg: #050c1f;
+  --port-bg-2: #081633;
+  --port-text: #ffffff;
+  --port-muted: rgba(255, 255, 255, 0.68);
+  --port-accent: #e85d04;
+  --port-accent-2: #ffb703;
+  --port-line: rgba(255, 255, 255, 0.13);
+  --port-card: rgba(9, 21, 48, 0.9);
+  --port-shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(125deg, rgba(232, 93, 4, 0.13), transparent 38%),
+    linear-gradient(180deg, #050c1f 0%, #071226 48%, #050c1f 100%);
+  background-size: 44px 44px, 44px 44px, 100% 100%, 100% 100%;
+}
+
+.pk-page .port-nav {
+  background: rgba(5, 12, 31, 0.78);
+  color: white;
+}
+
+.pk-page .port-nav__links a:hover,
+.pk-page .port-btn--outline {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pk-page .port-hero__badge {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.pk-page .port-verse--primary {
+  background:
+    linear-gradient(135deg, rgba(27, 63, 160, 0.72), rgba(5, 12, 31, 0.96)),
+    #081633;
+}
+
+.pk-page .port-verse--secondary {
+  background:
+    linear-gradient(135deg, rgba(232, 93, 4, 0.24), rgba(5, 12, 31, 0.96)),
+    #050c1f;
+}
+
+.pk-page .port-footer {
+  background: #030814;
+}

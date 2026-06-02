@@ -1,0 +1,41 @@
+.pp-page {
+  --port-bg: #ffffff;
+  --port-bg-2: #f2f7fb;
+  --port-text: #0d1b3e;
+  --port-muted: #5f6f89;
+  --port-accent: #10b981;
+  --port-accent-2: #1b3fa0;
+  --port-line: rgba(13, 27, 62, 0.12);
+  --port-card: rgba(255, 255, 255, 0.96);
+  --port-shadow: 0 22px 70px rgba(13, 27, 62, 0.14);
+  background:
+    linear-gradient(90deg, rgba(13, 27, 62, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(13, 27, 62, 0.026) 1px, transparent 1px),
+    linear-gradient(125deg, rgba(16, 185, 129, 0.11), transparent 38%),
+    linear-gradient(180deg, #ffffff 0%, #f5f8ff 48%, #ffffff 100%);
+  background-size: 44px 44px, 44px 44px, 100% 100%, 100% 100%;
+}
+
+.pp-page .port-hero h1 {
+  color: #0d1b3e;
+}
+
+.pp-page .port-marquee--reverse {
+  background: #1b3fa0;
+}
+
+.pp-page .port-verse--primary {
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(255, 255, 255, 0.9)),
+    #f2f7fb;
+}
+
+.pp-page .port-verse--secondary {
+  background:
+    linear-gradient(135deg, rgba(27, 63, 160, 0.16), rgba(255, 255, 255, 0.92)),
+    #edf4ff;
+}
+
+.pp-page .port-footer {
+  background: #0d1b3e;
+}

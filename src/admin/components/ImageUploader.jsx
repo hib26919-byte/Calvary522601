@@ -30,8 +30,8 @@ export default function ImageUploader({ currentUrl, onUpload, onUrlChange, label
         onClick={() => document.getElementById(`file-${label.replace(/\W/g, "")}`).click()}
       >
         <input id={`file-${label.replace(/\W/g, "")}`} type="file" accept="image/*" hidden onChange={(e) => handleFiles(e.target.files)} />
-        <strong>{busy ? "Uploading..." : label}</strong>
-        <span>Drag and drop or click to browse</span>
+        <strong>{busy ? "Compressing to 70 KB..." : label}</strong>
+        <span>Drag and drop or click to browse. Images compress before upload.</span>
       </div>
       <input className="admin-input" value={currentUrl || ""} onChange={(e) => onUrlChange(e.target.value)} placeholder="Or paste image URL" style={{ marginTop: 10 }} />
       {error && <p style={{ color: "#7A1D5C", marginTop: 6 }}>{error}</p>}

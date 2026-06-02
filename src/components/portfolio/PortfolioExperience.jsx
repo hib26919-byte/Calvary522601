@@ -239,9 +239,9 @@ function ShortsSection({ config, language, shorts, activeShort, setActiveShort }
     <RevealSection className="port-shorts" threshold={0.2}>
       <div className="port-container">
         <SectionHeader
-          kicker="Ministry In Motion"
-          title={config.theme === "pk" ? "Village moments, carried with fire." : "Children's moments, held with grace."}
-          lead={config.theme === "pk" ? "Short-form ministry cards ready for future video uploads." : "A visual reel for classes, visits, prayer, and family care."}
+          kicker="Photo Frames"
+          title={config.theme === "pk" ? "Village moments in living frames." : "Children's moments in graceful frames."}
+          lead={config.theme === "pk" ? "Photo-only frames for prayer visits, outreach, families, and village care." : "Photo-only frames for classes, visits, prayer, and family care."}
         />
         <div className="port-shorts__grid">
           {shorts.map((short, index) => (
@@ -254,7 +254,8 @@ function ShortsSection({ config, language, shorts, activeShort, setActiveShort }
             >
               <span className="port-short__media">
                 <img src={short.image} alt={copy(short.title, language)} loading="lazy" />
-                <i aria-hidden="true">{activeShort === index ? "||" : ">"}</i>
+                <span className="port-short__plate" aria-hidden="true" />
+                <span className="port-short__frame-mark" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
               </span>
               <span className="port-short__copy">
                 <strong>{copy(short.title, language)}</strong>

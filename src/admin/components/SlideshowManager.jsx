@@ -89,14 +89,14 @@ export default function SlideshowManager({
       <div className="slideshow-manager__head">
         <div>
           <label>{label}</label>
-          <p>{items.length}/{maxImages} images. These appear as a clean slideshow with no text overlay.</p>
+          <p>{items.length}/{maxImages} images. Uploads are compressed to 70 KB and appear as a clean slideshow.</p>
         </div>
       </div>
 
       <div className="slideshow-manager__add">
         <label className={`admin-upload-zone ${busy ? "is-busy" : ""}`}>
           <input type="file" accept="image/*" hidden onChange={(e) => handleFile(e.target.files?.[0])} />
-          <strong>{busy ? "Uploading..." : "Upload slideshow image"}</strong>
+          <strong>{busy ? "Compressing to 70 KB..." : "Upload slideshow image"}</strong>
           <span>Recommended: wide, sharp ministry photos</span>
         </label>
         <div className="slideshow-manager__url-row">

@@ -1,8 +1,9 @@
 export const MINISTRY_STORY_EN = `
-  <p>Our ministry journey began in 2000 through my father's ministry, Ravi Children & Tribal Ministry. He faithfully served many children and tribal communities with dedication and compassion.</p>
-  <p>In 2020, during the COVID period, my father passed away. After that moment, I made a decision in my heart to continue serving God and people through ministry.</p>
-  <p>By God's grace and guidance, I am continuing this path with faith and purpose. I took baptism at the age of 18, and since then I have been growing spiritually and seeking to become an inspiration and servant for others through God's word and service.</p>
-  <p>My goal is to pursue Bible training abroad so I can strengthen my leadership, theological understanding, and ministry skills. I want to use this knowledge to develop my ministry and organization in a way that positively impacts communities through faith, guidance, and service.</p>
+  <p><strong>Hello my brothers and sisters. Greetings to you in the name of our Lord &amp; Saviour Jesus Christ. Hope you are doing well.</strong></p>
+  <p>Our ministry journey began in <strong>2008</strong> through my father's ministry and tribal ministry. He faithfully served many children and tribal communities with dedication and compassion.</p>
+  <p>Unfortunately, my father passed away due to the COVID pandemic on <strong>May 3rd, 2021</strong>. After that moment, we made a decision in our hearts to continue serving God and people through ministry.</p>
+  <p>By God's grace and guidance, we are continuing this path with faith and purpose. We took baptism at the age of 18, and since then we have been growing spiritually and seeking to become an inspiration and servant for others through God's Word and service.</p>
+  <p>Our goal is to pursue Bible training abroad to strengthen leadership, theological understanding, and ministry skills. We desire to use this knowledge to develop the ministry and positively impact communities through faith, guidance, and service.</p>
 `;
 
 export const MINISTRY_STORY_TE = `

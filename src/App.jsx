@@ -10,6 +10,7 @@ import ChatbotWidget from "./components/chatbot/ChatbotWidget";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import PageLoader from "./components/common/PageLoader";
 import FloatingContact from "./components/common/FloatingContact";
+import PwaInstallPrompt from "./components/common/PwaInstallPrompt";
 import ProtectedRoute from "./admin/ProtectedRoute";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -43,6 +44,7 @@ function PublicLayout({ children }) {
       <MobileBottomNav />
       <ChatbotWidget />
       <FloatingContact />
+      <PwaInstallPrompt />
     </>
   );
 }

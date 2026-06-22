@@ -25,14 +25,22 @@ export default function AboutPage() {
       <section className="section section--soft">
         <div className="container leader-duo">
           <article>
-            <span className="eyebrow">{language === "te" ? "మొదట" : "First"}</span>
-            <h2>{language === "te" ? "స్థాపకుడు - తండ్రి" : "Founder - Father"}</h2>
-            <p>{language === "te" ? "రవి చిల్డ్రన్ & ట్రైబల్ మినిస్ట్రీ ద్వారా 2000లో పిల్లలు మరియు గిరిజన సమాజాలకు కరుణతో సేవ ప్రారంభించారు." : "Through Ravi Children & Tribal Ministry, he began serving children and tribal communities in 2000 with compassion and dedication."}</p>
+            <span className="eyebrow">FOUNDER</span>
+            <h2>Anuparti Ravi</h2>
+            <p>Calvary Prema Ministries</p>
+            <strong>2008 – 2021</strong>
           </article>
           <article>
-            <span className="eyebrow">{language === "te" ? "తర్వాత" : "Now"}</span>
-            <h2>{language === "te" ? "ప్రస్తుత నాయకుడు - కుమారుడు" : "Present Leader - His Son"}</h2>
-            <p>{language === "te" ? "2020 తరువాత తండ్రి పరిచర్యను కొనసాగిస్తూ, బైబిల్ శిక్షణ, నాయకత్వం మరియు సేవ ద్వారా సమాజాలను బలపరచాలనే దృష్టితో ముందుకు సాగుతున్నారు." : "After 2020, his son continued the ministry with a vision to strengthen communities through Bible training, leadership, and faithful service."}</p>
+            <span className="eyebrow">DIRECTOR &amp; CHAIRMAN</span>
+            <h2>Anuparti Kranthi</h2>
+            <p>Reaching Unreached Tribal Areas</p>
+            <strong>2018 – Present</strong>
+          </article>
+          <article>
+            <span className="eyebrow">VICE-CHAIRMAN</span>
+            <h2>Anuparti Prasanth</h2>
+            <p>Gospel Leader</p>
+            <strong>2018 – Present</strong>
           </article>
         </div>
       </section>

@@ -55,15 +55,15 @@ export function buildLeaderProfiles(data = {}, language = "en") {
   return [
     {
       key: "founder",
-      name: pick(data, language, "founderName", "Founder"),
-      role: pick(data, language, "founderRole", isTelugu ? "Founder" : "Founder"),
-      title: pick(data, language, "founderTitle", "Ravi Children & Tribal Ministry"),
-      years: pick(data, language, "founderYears", "2000-2020"),
+      name: pick(data, language, "founderName", "Anuparti Ravi"),
+      role: pick(data, language, "founderRole", isTelugu ? "FOUNDER" : "FOUNDER"),
+      title: pick(data, language, "founderTitle", "Calvary Prema Ministries"),
+      years: pick(data, language, "founderYears", "2008 – 2021"),
       bio: pick(
         data,
         language,
         "founderBio",
-        "Faithfully served children and tribal communities with prayer, compassion, and dedication."
+        "Faithfully served children and tribal communities through Calvary Prema Ministries with prayer, compassion, and dedication."
       ),
       photoUrl: founderPhoto(data),
       galleryImages: normalizePortfolioImages(data?.founderImages, "Founder portfolio image")
@@ -73,14 +73,14 @@ export function buildLeaderProfiles(data = {}, language = "en") {
       slug: "kranthi",
       portfolioPath: "/portfolio/kranthi",
       name: pick(data, language, "son1Name", "Anuparti Kranthi"),
-      role: pick(data, language, "son1Role", "Tribal Outreach Leader"),
-      title: pick(data, language, "son1Title", "Tribal Ministry Support"),
-      years: pick(data, language, "son1Years", "Community Service"),
+      role: pick(data, language, "son1Role", "DIRECTOR & CHAIRMAN"),
+      title: pick(data, language, "son1Title", "Reaching Unreached Tribal Areas"),
+      years: pick(data, language, "son1Years", "2018 – Present"),
       bio: pick(
         data,
         language,
         "son1Bio",
-        "Serving tribal families with prayer, guidance, compassionate care, and practical ministry support."
+        "Serving unreached tribal areas with prayer, guidance, compassionate care, and practical ministry support."
       ),
       photoUrl: imageUrl(data?.son1PhotoURL),
       galleryImages: normalizePortfolioImages(data?.son1Images, "Kranthi portfolio image")
@@ -89,15 +89,15 @@ export function buildLeaderProfiles(data = {}, language = "en") {
       key: "prasanth",
       slug: "prasanth",
       portfolioPath: "/portfolio/prasanth",
-      name: pick(data, language, "son2Name", "A. Prasanth"),
-      role: pick(data, language, "son2Role", "Present Director"),
-      title: pick(data, language, "son2Title", "Calvary Prema Ministries"),
-      years: pick(data, language, "son2Years", "Graduate B.A"),
+      name: pick(data, language, "son2Name", "Anuparti Prasanth"),
+      role: pick(data, language, "son2Role", "VICE-CHAIRMAN"),
+      title: pick(data, language, "son2Title", "Gospel Leader"),
+      years: pick(data, language, "son2Years", "2018 – Present"),
       bio: pick(
         data,
         language,
         "son2Bio",
-        "Continuing his father's vision through church ministry, tribal outreach, children's ministry, and Bible training."
+        "Continuing Gospel leadership through church ministry, tribal outreach, children's ministry, and Bible training."
       ),
       photoUrl: imageUrl(data?.son2PhotoURL),
       galleryImages: normalizePortfolioImages(data?.son2Images, "Prasanth portfolio image")

@@ -1,0 +1,107 @@
+.pwa-install-banner,
+.pwa-install-fab {
+  position: fixed;
+  right: 18px;
+  z-index: 930;
+  font-family: var(--font-ui);
+}
+
+.pwa-install-banner {
+  bottom: 28px;
+  width: min(360px, calc(100vw - 32px));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.98);
+  border: 1px solid rgba(109,40,217,0.2);
+  box-shadow: 0 22px 54px rgba(30,10,61,0.24);
+}
+
+.pwa-install-banner__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pwa-install-banner__copy strong {
+  color: var(--color-primary-dark);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.pwa-install-banner__copy span {
+  color: var(--color-text-body);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.pwa-install-banner__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+}
+
+.pwa-install-banner__install,
+.pwa-install-banner__later,
+.pwa-install-fab {
+  min-height: 42px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 900;
+  transition: transform var(--transition-fast), filter var(--transition-fast), background var(--transition-fast);
+}
+
+.pwa-install-banner__install {
+  flex: 1;
+  background: var(--gradient-lavender);
+  color: white;
+}
+
+.pwa-install-banner__later {
+  min-width: 86px;
+  padding: 0 14px;
+  background: var(--color-light-blue);
+  color: var(--color-primary-dark);
+}
+
+.pwa-install-banner__close {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: rgba(75,22,140,0.08);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.pwa-install-banner__install:hover,
+.pwa-install-banner__later:hover,
+.pwa-install-banner__close:hover,
+.pwa-install-fab:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.pwa-install-fab {
+  bottom: 28px;
+  padding: 0 18px;
+  background: var(--gradient-lavender);
+  color: white;
+  box-shadow: 0 16px 34px rgba(30,10,61,0.28);
+}
+
+@media (max-width: 860px) {
+  .pwa-install-banner,
+  .pwa-install-fab {
+    right: 12px;
+    bottom: 96px;
+  }
+}
+
+@media (max-width: 420px) {
+  .pwa-install-banner {
+    width: calc(100vw - 24px);
+  }
+}

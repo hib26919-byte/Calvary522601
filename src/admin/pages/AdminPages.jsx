@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { uploadToImgBB, validateImageFile } from "../../lib/imgbb";
+import { DEFAULT_GALLERY_CATEGORIES, findGalleryCategory } from "../../lib/galleryCategories";
 import ImageUploader from "../components/ImageUploader";
 import RichTextEditor from "../components/RichTextEditor";
 import SlideshowManager from "../components/SlideshowManager";
@@ -55,15 +56,16 @@ export default function AdminPages() {
     setPageData({});
   }
 
-  async function uploadImageField(file, field, name, extraFields = {}) {
+  async function uploadImageField(file, field, name, extraFields = {}, options = {}) {
     validateImageFile(file);
-    const result = await uploadToImgBB(file, name);
+    const result = await uploadToImgBB(file, name, options);
     updateFields({ [field]: result.url, ...extraFields });
   }
 
   async function uploadPageGalleryImage(file) {
     validateImageFile(file);
     const category = activeTab === "tribalPage" ? "tribal" : "children";
+    const galleryCategory = findGalleryCategory(DEFAULT_GALLERY_CATEGORIES, category);
     const result = await uploadToImgBB(file, `${category}_gallery`);
     await addDoc(collection(db, "gallery"), {
       imageURL: result.url,
@@ -72,7 +74,12 @@ export default function AdminPages() {
       caption_te: activeTab === "tribalPage" ? "గిరిజన సేవ" : "పిల్లల పరిచర్య",
       about_en: "",
       about_te: "",
+      categoryId: galleryCategory?.id || category,
       category,
+      categoryName: galleryCategory?.categoryName || category,
+      originalSize: result.originalSize || null,
+      optimizedSize: result.optimizedSize || result.compressedSize || null,
+      optimizedType: result.optimizedType || result.compressedType || null,
       uploadedAt: serverTimestamp(),
       order: Date.now()
     });
@@ -122,7 +129,7 @@ export default function AdminPages() {
                 <label>Fallback Hero Image</label>
                 <ImageUploader
                   currentUrl={pageData.heroImageURL}
-                  onUpload={(file) => uploadImageField(file, "heroImageURL", `${activeTab}_hero`)}
+                  onUpload={(file, options) => uploadImageField(file, "heroImageURL", `${activeTab}_hero`, {}, options)}
                   onUrlChange={(url) => update("heroImageURL", url)}
                   label="Upload Hero Image"
                 />
@@ -142,7 +149,7 @@ export default function AdminPages() {
                 <label>Jesus Artwork Image URL (optional)</label>
                 <ImageUploader
                   currentUrl={pageData.jesusImageURL}
-                  onUpload={(file) => uploadImageField(file, "jesusImageURL", `${activeTab}_jesus_art`)}
+                  onUpload={(file, options) => uploadImageField(file, "jesusImageURL", `${activeTab}_jesus_art`, {}, options)}
                   onUrlChange={(url) => update("jesusImageURL", url)}
                   label="Upload Jesus Ministry Artwork"
                 />
@@ -176,7 +183,7 @@ export default function AdminPages() {
               <p style={{ color: "var(--color-text-muted)", marginBottom: 12 }}>
                 This upload is automatically assigned to {activeTab === "tribalPage" ? "Tribal Outreach" : "Children's Ministry"} gallery category.
               </p>
-              <input className="admin-input" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadPageGalleryImage(e.target.files[0])} />
+              <input className="admin-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && uploadPageGalleryImage(e.target.files[0])} />
             </div>
           )}
 
@@ -256,9 +263,9 @@ export default function AdminPages() {
 }
 
 function LeaderEditor({ title, prefix, photoField, legacyPhotoField, slideshowField, pageData, update, updateFields }) {
-  async function uploadLeaderPhoto(file) {
+  async function uploadLeaderPhoto(file, options = {}) {
     validateImageFile(file);
-    const result = await uploadToImgBB(file, `${prefix}_leader_photo`);
+    const result = await uploadToImgBB(file, `${prefix}_leader_photo`, options);
     updateFields({ [photoField]: result.url, ...(legacyPhotoField ? { [legacyPhotoField]: result.url } : {}) });
   }
 

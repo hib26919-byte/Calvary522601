@@ -1,36 +1,42 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useContent } from "../../context/ContentContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { activeGalleryCategories, findGalleryCategory, imageMatchesCategory } from "../../lib/galleryCategories";
 import LightboxModal from "./LightboxModal";
 import "./Gallery.css";
 
-const CATEGORIES = [
-  { value: "all", en: "All", te: "అన్నీ" },
-  { value: "tribal", en: "Tribal Outreach", te: "గిరిజన సేవ" },
-  { value: "children", en: "Children's Ministry", te: "పిల్లల పరిచర్య" },
-  { value: "church", en: "Church", te: "చర్చి" },
-  { value: "events", en: "Events", te: "కార్యక్రమాలు" }
-];
-
 export default function GalleryGrid({ category }) {
-  const { gallery } = useContent();
+  const { gallery, galleryCategories } = useContent();
   const { t, language } = useLanguage();
+  const categories = useMemo(() => activeGalleryCategories(galleryCategories), [galleryCategories]);
 
   const [filter, setFilter] = useState(category || "all");
   const [activeIndex, setActiveIndex] = useState(null);
   const [visibleCount, setVisibleCount] = useState(9);
 
+  useEffect(() => {
+    setFilter(category || "all");
+    setVisibleCount(9);
+    setActiveIndex(null);
+  }, [category]);
+
   const images = useMemo(() => {
-    return filter === "all"
-      ? gallery
-      : gallery.filter((img) => img.category === filter);
-  }, [gallery, filter]);
+    if (filter === "all") return gallery;
+
+    const selectedCategory = findGalleryCategory(categories, filter);
+    if (!selectedCategory) {
+      return gallery.filter((img) => img.categoryId === filter || img.category === filter);
+    }
+
+    return gallery.filter((img) => imageMatchesCategory(img, selectedCategory));
+  }, [categories, filter, gallery]);
 
   const visibleImages = images.slice(0, visibleCount);
 
   function changeFilter(value) {
     setFilter(value);
     setVisibleCount(9);
+    setActiveIndex(null);
   }
 
   return (
@@ -60,19 +66,31 @@ export default function GalleryGrid({ category }) {
           <img
             src="/Calvary_Prema_Ministries_Narasaropet.webp"
             alt="Calvary Prema Ministries"
+            loading="lazy"
+            decoding="async"
+            sizes="(max-width: 700px) 100vw, 50vw"
           />
         </div>
       </div>
 
       {!category && (
         <div className="gallery-filters">
-          {CATEGORIES.map((cat) => (
+          <button
+            className={filter === "all" ? "active" : ""}
+            onClick={() => changeFilter("all")}
+          >
+            {language === "te" ? "అన్నీ" : "All"}
+          </button>
+
+          {categories.map((cat) => (
             <button
-              key={cat.value}
-              className={filter === cat.value ? "active" : ""}
-              onClick={() => changeFilter(cat.value)}
+              key={cat.id}
+              className={filter === cat.id ? "active" : ""}
+              onClick={() => changeFilter(cat.id)}
+              style={cat.color ? { "--gallery-category-color": cat.color } : undefined}
             >
-              {cat[language] || cat.en}
+              {cat.icon && <span aria-hidden="true">{cat.icon}</span>}
+              {cat.categoryName}
             </button>
           ))}
         </div>
@@ -95,10 +113,11 @@ export default function GalleryGrid({ category }) {
               >
                 <span className="gallery-tile__frame">
                   <img
-                    src={img.imageURL || img.thumbURL}
+                    src={img.thumbURL || img.thumbUrl || img.imageURL}
                     alt={t(img, "caption") || "Ministry gallery"}
                     loading="lazy"
                     decoding="async"
+                    sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
                   />
                 </span>
 

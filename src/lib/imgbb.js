@@ -1,6 +1,16 @@
 const IMGBB_API_KEY = "d3807d2bf0af64066b89b9dd40b453f3";
 const IMGBB_UPLOAD_URL = "https://api.imgbb.com/1/upload";
-export const IMAGE_UPLOAD_TARGET_BYTES = 70 * 1024;
+
+export const IMAGE_UPLOAD_TARGET_BYTES = 300 * 1024;
+
+const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
+
+function reportProgress(onProgress, stage, percent, message) {
+  if (typeof onProgress === "function") {
+    onProgress({ stage, percent, message });
+  }
+}
 
 export async function uploadToImgBB(imageData, name = "", options = {}) {
   const formData = new FormData();
@@ -8,12 +18,18 @@ export async function uploadToImgBB(imageData, name = "", options = {}) {
   const uploadMeta = {};
 
   if (imageData instanceof File) {
-    const compressed = await compressImageFile(imageData, options.maxBytes || IMAGE_UPLOAD_TARGET_BYTES);
-    const base64 = await fileToBase64(compressed);
+    const optimized = await compressImageFile(imageData, {
+      maxBytes: options.maxBytes || IMAGE_UPLOAD_TARGET_BYTES,
+      onProgress: options.onProgress
+    });
+    const base64 = await fileToBase64(optimized);
+    reportProgress(options.onProgress, "uploading", 88, "Uploading optimized image...");
     formData.append("image", base64.split(",")[1]);
     uploadMeta.originalSize = imageData.size;
-    uploadMeta.compressedSize = compressed.size;
-    uploadMeta.compressedType = compressed.type;
+    uploadMeta.optimizedSize = optimized.size;
+    uploadMeta.optimizedType = optimized.type;
+    uploadMeta.compressedSize = optimized.size;
+    uploadMeta.compressedType = optimized.type;
   } else if (typeof imageData === "string" && imageData.startsWith("data:")) {
     formData.append("image", imageData.split(",")[1]);
   } else {
@@ -29,6 +45,7 @@ export async function uploadToImgBB(imageData, name = "", options = {}) {
   }
   const data = await response.json();
   if (!data.success) throw new Error(`ImgBB error: ${data?.error?.message || "Unknown error"}`);
+  reportProgress(options.onProgress, "done", 100, "Upload complete.");
 
   return {
     url: data.data.url,
@@ -51,11 +68,9 @@ export function fileToBase64(file) {
 }
 
 export function validateImageFile(file) {
-  const maxSize = 32 * 1024 * 1024;
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp", "image/svg+xml"];
   if (!file) throw new Error("No image selected.");
-  if (!allowedTypes.includes(file.type)) throw new Error("Only JPEG, PNG, GIF, WebP, BMP, and SVG images are allowed.");
-  if (file.size > maxSize) throw new Error("Image must be smaller than 32MB.");
+  if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) throw new Error("Only JPG, JPEG, PNG, and WebP images are allowed.");
+  if (file.size > MAX_UPLOAD_BYTES) throw new Error("Image must be smaller than 32MB.");
   return true;
 }
 
@@ -69,19 +84,19 @@ function canvasToBlob(canvas, type, quality) {
   });
 }
 
-function compressedFileName(fileName, type) {
-  const extension = type === "image/webp" ? ".webp" : ".jpg";
-  return (fileName || "compressed-image").replace(/\.[^.]+$/, "") + extension;
+function optimizedFileName(fileName, type) {
+  const extension = type === "image/webp" ? ".webp" : type === "image/png" ? ".png" : ".jpg";
+  return (fileName || "optimized-image").replace(/\.[^.]+$/, "") + extension;
 }
 
 function asUploadFile(blob, sourceFile) {
-  return new File([blob], compressedFileName(sourceFile.name, blob.type), {
+  return new File([blob], optimizedFileName(sourceFile.name, blob.type), {
     type: blob.type || "image/jpeg",
     lastModified: Date.now()
   });
 }
 
-function drawToCanvas(bitmap, maxDimension) {
+function drawToCanvas(bitmap, maxDimension, preserveAlpha) {
   const longestSide = Math.max(bitmap.width, bitmap.height);
   const scale = Math.min(1, maxDimension / longestSide);
   const width = Math.max(1, Math.round(bitmap.width * scale));
@@ -89,39 +104,78 @@ function drawToCanvas(bitmap, maxDimension) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext("2d", { alpha: false });
+  const ctx = canvas.getContext("2d", { alpha: preserveAlpha });
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
+  if (!preserveAlpha) {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+  }
   ctx.drawImage(bitmap, 0, 0, width, height);
   return canvas;
 }
 
-export async function compressImageFile(file, maxBytes = IMAGE_UPLOAD_TARGET_BYTES) {
-  if (!file || !file.type?.startsWith("image/")) return file;
-  if (file.size <= maxBytes && (file.type === "image/jpeg" || file.type === "image/webp")) return file;
-  if (file.type === "image/svg+xml") {
-    if (file.size <= maxBytes) return file;
-    throw new Error("SVG images cannot be compressed to 70 KB automatically. Please upload a JPG, PNG, WebP, BMP, or GIF image.");
+async function hasTransparentPixels(bitmap) {
+  const sampleSize = 96;
+  const longestSide = Math.max(bitmap.width, bitmap.height);
+  const scale = Math.min(1, sampleSize / longestSide);
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { alpha: true });
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  const pixels = ctx.getImageData(0, 0, width, height).data;
+
+  for (let i = 3; i < pixels.length; i += 4) {
+    if (pixels[i] < 255) return true;
   }
+  return false;
+}
+
+function normalizeOptimizeOptions(options) {
+  if (typeof options === "number") return { maxBytes: options };
+  return options || {};
+}
+
+export async function compressImageFile(file, options = {}) {
+  const { maxBytes = IMAGE_UPLOAD_TARGET_BYTES, onProgress } = normalizeOptimizeOptions(options);
+  if (!file || !file.type?.startsWith("image/")) return file;
+  validateImageFile(file);
+  if (file.size <= maxBytes) {
+    reportProgress(onProgress, "done", 100, "Image is already optimized.");
+    return file;
+  }
+  reportProgress(onProgress, "analyzing", 8, "Analyzing image...");
 
   const bitmap = await createImageBitmap(file);
-  const dimensions = [1600, 1400, 1200, 1000, 840, 720, 600, 500, 420, 340, 280, 220, 180, 140, 110, 88];
-  const qualities = [0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5, 0.44, 0.38, 0.32, 0.26, 0.2];
-  const types = ["image/webp", "image/jpeg"];
+  const sourceLongestSide = Math.max(bitmap.width, bitmap.height);
+  const preserveAlpha = ["image/png", "image/webp"].includes(file.type) && await hasTransparentPixels(bitmap);
+  const dimensions = [sourceLongestSide, 2400, 2200, 2000, 1800, 1600, 1400, 1200, 1000, 900, 800, 720, 640];
+  const qualities = [0.92, 0.88, 0.84, 0.8, 0.76, 0.72, 0.68, 0.64, 0.6, 0.56, 0.52];
+  const types = preserveAlpha ? ["image/webp", "image/png"] : ["image/webp", "image/jpeg"];
   let smallestBlob = null;
   let previousCanvasSize = "";
+  let attempts = 0;
+  const maxAttempts = dimensions.length * qualities.length * types.length;
 
   try {
     for (const dimension of dimensions) {
-      const canvas = drawToCanvas(bitmap, dimension);
+      const canvas = drawToCanvas(bitmap, dimension, preserveAlpha);
       const canvasSize = `${canvas.width}x${canvas.height}`;
       if (canvasSize === previousCanvasSize) continue;
       previousCanvasSize = canvasSize;
 
       for (const quality of qualities) {
         for (const type of types) {
+          attempts += 1;
+          reportProgress(
+            onProgress,
+            "compressing",
+            Math.min(82, 12 + Math.round((attempts / maxAttempts) * 70)),
+            "Optimizing image quality..."
+          );
           const blob = await canvasToBlob(canvas, type, quality);
           if (!blob) continue;
           if (!smallestBlob || blob.size < smallestBlob.size) smallestBlob = blob;
@@ -133,6 +187,18 @@ export async function compressImageFile(file, maxBytes = IMAGE_UPLOAD_TARGET_BYT
     bitmap.close?.();
   }
 
-  if (smallestBlob && smallestBlob.size <= maxBytes) return asUploadFile(smallestBlob, file);
-  throw new Error("Could not compress this image. Please try a different photo.");
+  if (smallestBlob) return asUploadFile(smallestBlob, file);
+  throw new Error("Could not optimize this image. Please try a different photo.");
+}
+
+export async function reoptimizeImageUrl(url, name = "reoptimized-image", options = {}) {
+  if (!url) throw new Error("No image URL provided.");
+  reportProgress(options.onProgress, "downloading", 5, "Downloading existing image...");
+  const response = await fetch(url, { mode: "cors" });
+  if (!response.ok) throw new Error("Could not download the existing image for re-optimization.");
+  const blob = await response.blob();
+  const type = SUPPORTED_IMAGE_TYPES.includes(blob.type) ? blob.type : "image/jpeg";
+  const extension = type === "image/webp" ? "webp" : type === "image/png" ? "png" : "jpg";
+  const file = new File([blob], `${name}.${extension}`, { type });
+  return uploadToImgBB(file, name, options);
 }

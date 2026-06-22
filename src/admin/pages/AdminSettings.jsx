@@ -19,9 +19,9 @@ export default function AdminSettings() {
   function updateSocial(field, value) {
     setSettings((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, [field]: value } }));
   }
-  async function uploadLogo(file) {
+  async function uploadLogo(file, options = {}) {
     validateImageFile(file);
-    const result = await uploadToImgBB(file, "calvary_prema_logo");
+    const result = await uploadToImgBB(file, "calvary_prema_logo", options);
     update("logoURL", result.url);
   }
   async function save() {

@@ -13,7 +13,7 @@ export default function LightboxModal({ images, index, onClose, onIndex }) {
       <div className="lightbox__panel">
         <button className="lightbox__close" onClick={onClose}>×</button>
         {images.length > 1 && <button className="lightbox__nav lightbox__nav--prev" onClick={prev}>‹</button>}
-        <img src={image.imageURL} alt={t(image, "caption") || "Ministry gallery"} />
+        <img src={image.imageURL || image.thumbURL || image.thumbUrl} alt={t(image, "caption") || "Ministry gallery"} decoding="async" />
         {images.length > 1 && <button className="lightbox__nav lightbox__nav--next" onClick={next}>›</button>}
         {(t(image, "caption") || t(image, "about")) && <p><strong>{t(image, "caption")}</strong>{t(image, "about") && <span>{t(image, "about")}</span>}</p>}
       </div>

@@ -7,6 +7,7 @@ export default function AdminFestivalBanner() {
   const [banners, setBanners] = useState([]);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
   const [form, setForm] = useState({ title_en: "", title_te: "", subtitle_en: "", subtitle_te: "", imageURL: "", startDate: "", endDate: "", isActive: true });
   useEffect(() => { fetchBanners(); }, []);
 
@@ -17,8 +18,13 @@ export default function AdminFestivalBanner() {
 
   async function handleImageUpload(file) {
     validateImageFile(file);
-    const result = await uploadToImgBB(file, "banner");
-    setForm((p) => ({ ...p, imageURL: result.url }));
+    setUploadProgress({ percent: 0, message: "Preparing image..." });
+    try {
+      const result = await uploadToImgBB(file, "banner", { onProgress: setUploadProgress });
+      setForm((p) => ({ ...p, imageURL: result.url }));
+    } finally {
+      setUploadProgress(null);
+    }
   }
 
   async function saveBanner() {
@@ -48,7 +54,7 @@ export default function AdminFestivalBanner() {
   return (
     <div>
       <div className="admin-section-header"><h2>Festival Banners</h2><p>Create special occasion popups shown once per visitor session inside the active date range.</p><button className="admin-btn admin-btn--primary" onClick={() => setCreating(true)}>Create Banner</button></div>
-      {creating && <div className="admin-card"><h3 className="admin-card__title">New Festival Banner</h3><div className="admin-form-grid">{["title_en", "title_te", "subtitle_en", "subtitle_te"].map((field) => <div key={field} className="admin-form-group admin-form-group--full"><label>{field}</label><input className="admin-input" value={form[field]} onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))} lang={field.endsWith("_te") ? "te" : undefined} /></div>)}<div className="admin-form-group"><label>Start Date</label><input className="admin-input" type="datetime-local" value={form.startDate} onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))} /></div><div className="admin-form-group"><label>End Date</label><input className="admin-input" type="datetime-local" value={form.endDate} onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))} /></div><div className="admin-form-group"><label>Active</label><input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} /></div><div className="admin-form-group admin-form-group--full"><label>Image</label><input className="admin-input" type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0])} />{form.imageURL && <img src={form.imageURL} alt="Preview" style={{ maxWidth: 300, borderRadius: 8, marginTop: 8 }} />}</div></div><div style={{ display: "flex", gap: 10 }}><button className="admin-btn admin-btn--primary" onClick={saveBanner} disabled={saving}>{saving ? "Saving..." : "Save Banner"}</button><button className="admin-btn admin-btn--ghost" onClick={() => setCreating(false)}>Cancel</button></div></div>}
+      {creating && <div className="admin-card"><h3 className="admin-card__title">New Festival Banner</h3><div className="admin-form-grid">{["title_en", "title_te", "subtitle_en", "subtitle_te"].map((field) => <div key={field} className="admin-form-group admin-form-group--full"><label>{field}</label><input className="admin-input" value={form[field]} onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))} lang={field.endsWith("_te") ? "te" : undefined} /></div>)}<div className="admin-form-group"><label>Start Date</label><input className="admin-input" type="datetime-local" value={form.startDate} onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))} /></div><div className="admin-form-group"><label>End Date</label><input className="admin-input" type="datetime-local" value={form.endDate} onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))} /></div><div className="admin-form-group"><label>Active</label><input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} /></div><div className="admin-form-group admin-form-group--full"><label>Image</label><input className="admin-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleImageUpload(e.target.files[0])} />{uploadProgress && <p style={{ color: "var(--color-text-muted)", marginTop: 8 }}>{uploadProgress.message} ({uploadProgress.percent || 0}%)</p>}{uploadProgress && <progress value={uploadProgress.percent || 0} max="100" style={{ width: "min(320px, 100%)" }} />}{form.imageURL && <img src={form.imageURL} alt="Preview" style={{ maxWidth: 300, borderRadius: 8, marginTop: 8 }} />}</div></div><div style={{ display: "flex", gap: 10 }}><button className="admin-btn admin-btn--primary" onClick={saveBanner} disabled={saving}>{saving ? "Saving..." : "Save Banner"}</button><button className="admin-btn admin-btn--ghost" onClick={() => setCreating(false)}>Cancel</button></div></div>}
       <div className="admin-card">
         {banners.length === 0 ? <div className="admin-empty">No banners yet.</div> : banners.map((banner) => {
           const start = banner.startDate?.toDate?.() || new Date(banner.startDate);

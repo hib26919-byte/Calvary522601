@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { DEFAULT_IMAGES, MINISTRY_STORY_EN, MINISTRY_STORY_TE } from "../../lib/defaultContent";
+import { MINISTRY_STORY_EN, MINISTRY_STORY_TE } from "../../lib/defaultContent";
 import { useLanguage } from "../../context/LanguageContext";
 import ScrollReveal from "../common/ScrollReveal";
 import "./VisionStorySection.css";
@@ -14,8 +14,8 @@ export default function VisionStorySection() {
       <div className="vision-story__wrap">
         <ScrollReveal direction="left">
           <div className="vision-story__frames">
-            <div className="vision-story__frame vision-story__frame--one"><img src="/nrt.webp" alt="" /></div>
-            <div className="vision-story__frame vision-story__frame--two"><img src="/calvary_prema_nrt.webp" alt="" /></div>
+            <div className="vision-story__frame vision-story__frame--one"><img src="/nrt.webp" alt="" loading="lazy" decoding="async" sizes="(max-width: 767px) 100vw, (max-width: 1024px) 90vw, 48vw" /></div>
+            <div className="vision-story__frame vision-story__frame--two"><img src="/calvary_prema_nrt.webp" alt="" loading="lazy" decoding="async" sizes="(max-width: 767px) 100vw, (max-width: 1024px) 45vw, 260px" /></div>
             <div className="vision-story__year">2018</div>
           </div>
         </ScrollReveal>

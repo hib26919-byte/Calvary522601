@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { collection, doc, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { DEFAULT_GALLERY_CATEGORIES, normalizeGalleryCategory, sortGalleryCategories } from "../lib/galleryCategories";
 
 const ContentContext = createContext(null);
 const PAGE_IDS = ["homePage", "aboutPage", "tribalPage", "childrensPage", "contactPage", "globalSettings"];
@@ -17,6 +18,7 @@ export function ContentProvider({ children }) {
     }
   });
   const [gallery, setGallery] = useState([]);
+  const [galleryCategories, setGalleryCategories] = useState(DEFAULT_GALLERY_CATEGORIES);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,8 +33,22 @@ export function ContentProvider({ children }) {
       },
       (err) => console.warn(`Content fetch error for ${pageId}:`, err)
     ));
+    const unsubscribeCategories = onSnapshot(
+      query(collection(db, "galleryCategories"), orderBy("sortOrder", "asc")),
+      (snap) => {
+        const categories = snap.docs.map((categoryDoc, index) => normalizeGalleryCategory({ id: categoryDoc.id, ...categoryDoc.data() }, index));
+        setGalleryCategories(categories.length ? sortGalleryCategories(categories) : DEFAULT_GALLERY_CATEGORIES);
+      },
+      (err) => {
+        console.warn("Gallery categories fetch error:", err);
+        setGalleryCategories(DEFAULT_GALLERY_CATEGORIES);
+      }
+    );
     fetchGallery().finally(() => setLoading(false));
-    return () => unsubscribers.forEach((u) => u());
+    return () => {
+      unsubscribers.forEach((u) => u());
+      unsubscribeCategories();
+    };
   }, []);
 
   async function fetchGallery() {
@@ -54,6 +70,7 @@ export function ContentProvider({ children }) {
       contactPage: content.contactPage,
       globalSettings: content.globalSettings,
       gallery,
+      galleryCategories,
       loading,
       refreshGallery: fetchGallery
     }}>

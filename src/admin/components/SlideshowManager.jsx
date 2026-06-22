@@ -31,6 +31,7 @@ export default function SlideshowManager({
   const [draftUrl, setDraftUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState(null);
   const items = useMemo(() => {
     const list = Array.isArray(images) ? images : [];
     return list.map(normalizeItem).filter((item) => item.url).sort((a, b) => a.order - b.order);
@@ -51,9 +52,10 @@ export default function SlideshowManager({
     if (!file) return;
     setBusy(true);
     setError("");
+    setProgress({ percent: 0, message: "Preparing image..." });
     try {
       validateImageFile(file);
-      const result = await uploadToImgBB(file, uploadName || "page_slideshow");
+      const result = await uploadToImgBB(file, uploadName || "page_slideshow", { onProgress: setProgress });
       addImage({
         url: result.url,
         thumbUrl: result.thumbUrl,
@@ -64,6 +66,7 @@ export default function SlideshowManager({
       setError(err.message);
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
@@ -89,15 +92,16 @@ export default function SlideshowManager({
       <div className="slideshow-manager__head">
         <div>
           <label>{label}</label>
-          <p>{items.length}/{maxImages} images. Uploads are compressed to 70 KB and appear as a clean slideshow.</p>
+          <p>{items.length}/{maxImages} images. Uploads are automatically optimized near 300 KB and appear as a clean slideshow.</p>
         </div>
       </div>
 
       <div className="slideshow-manager__add">
         <label className={`admin-upload-zone ${busy ? "is-busy" : ""}`}>
-          <input type="file" accept="image/*" hidden onChange={(e) => handleFile(e.target.files?.[0])} />
-          <strong>{busy ? "Compressing to 70 KB..." : "Upload slideshow image"}</strong>
+          <input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => handleFile(e.target.files?.[0])} />
+          <strong>{busy ? progress?.message || "Optimizing image..." : "Upload slideshow image"}</strong>
           <span>Recommended: wide, sharp ministry photos</span>
+          {progress && <progress value={progress.percent || 0} max="100" style={{ width: "min(280px, 100%)" }} />}
         </label>
         <div className="slideshow-manager__url-row">
           <input

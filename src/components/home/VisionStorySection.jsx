@@ -14,8 +14,8 @@ export default function VisionStorySection() {
       <div className="vision-story__wrap">
         <ScrollReveal direction="left">
           <div className="vision-story__frames">
-            <div className="vision-story__frame vision-story__frame--one"><img src={DEFAULT_IMAGES.church} alt="" /></div>
-            <div className="vision-story__frame vision-story__frame--two"><img src={DEFAULT_IMAGES.prayer} alt="" /></div>
+            <div className="vision-story__frame vision-story__frame--one"><img src="/nrt.webp" alt="" /></div>
+            <div className="vision-story__frame vision-story__frame--two"><img src="/calvary_prema_nrt.webp" alt="" /></div>
             <div className="vision-story__year">2018</div>
           </div>
         </ScrollReveal>

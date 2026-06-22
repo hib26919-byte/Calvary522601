@@ -14,7 +14,7 @@ export default function ContactPage() {
   useEffect(() => { trackPageView("contact"); }, []);
 
   const address = t(contactPage, "address") || (language === "te" ? DEFAULT_MINISTRY_CONTENT.address_te : DEFAULT_MINISTRY_CONTENT.address_en);
-  const phone = globalSettings?.phone || contactPage?.phone || "81793 05085";
+  const phone = globalSettings?.phone || contactPage?.phone || "+91 80190 06339";
   const email = contactPage?.email || globalSettings?.email || "";
   const mapUrl = contactPage?.mapEmbedURL || "https://www.google.com/maps?q=Gogulapadu%20Rompicherla%20Palnadu%20Andhra%20Pradesh%20522617&output=embed";
 
@@ -57,8 +57,8 @@ export default function ContactPage() {
       <section className="contact-map-section">
         <div className="contact-map-section__inner">
           <div>
-            <span>{language === "te" ? "చర్చి స్థానం" : "Church Location"}</span>
-            <h2>{language === "te" ? "గొగులపాడు గ్రామం" : "Gogulapadu Village"}</h2>
+            <span>{language === "te" ? "కార్యాలయ స్థానం" : "Office Location"}</span>
+            <h2>{language === "te" ? "నరసరావుపేట" : "Narasaropet"}</h2>
             <p>{address}</p>
           </div>
           <iframe title="Calvary Prema Ministries map" src={mapUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />

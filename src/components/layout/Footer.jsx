@@ -35,7 +35,7 @@ export default function Footer() {
             <h4>{ts("contact_label")}</h4>
             <address>
               <p>Calvary Prema Ministries<br />Narasaropet,<br />Palnadu Dist., A.P. 522601</p>
-              <p><a href="tel:+918179305085" className="footer__phone">☎ 8019006339</a></p>
+              <p><a href="tel:+918179305085" className="footer__phone">☎+91 8019006339</a></p>
             </address>
             <div className="footer__social">
               {socials.whatsapp && <a href={`https://wa.me/${socials.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">WA</a>}

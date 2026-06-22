@@ -12,11 +12,11 @@ const CONTENT = {
   title_te: "గిరిజన సేవ",
   desc_en: "Our tribal outreach carries forward the torch lit by Ravi Children & Tribal Ministry, bringing the love of Christ to remote tribal villages across Andhra Pradesh through prayer, presence, and compassionate support.",
   desc_te: "రవి చిల్డ్రన్ & ట్రైబల్ మినిస్ట్రీ వెలిగించిన జ్యోతిని ముందుకు తీసుకెళ్తూ, ఆంధ్రప్రదేశ్‌లోని మారుమూల గిరిజన గ్రామాలకు ప్రార్థన, సమీపం మరియు ప్రేమతో సహాయం అందిస్తున్నాం.",
-  stat1_en: "30+ Villages",
+  stat1_en: "50+ Villages",
   stat1_te: "50+ గ్రామాలు",
   stat2_en: "500+ Families",
   stat2_te: "500+ కుటుంబాలు",
-  stat3_en: "Since 2000",
+  stat3_en: "Since 2018",
   stat3_te: "2018 నుండి",
   cta_en: "Learn About Tribal Outreach",
   cta_te: "గిరిజన సేవ గురించి తెలుసుకోండి"

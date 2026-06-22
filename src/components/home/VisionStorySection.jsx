@@ -16,7 +16,7 @@ export default function VisionStorySection() {
           <div className="vision-story__frames">
             <div className="vision-story__frame vision-story__frame--one"><img src={DEFAULT_IMAGES.church} alt="" /></div>
             <div className="vision-story__frame vision-story__frame--two"><img src={DEFAULT_IMAGES.prayer} alt="" /></div>
-            <div className="vision-story__year">2008</div>
+            <div className="vision-story__year">2018</div>
           </div>
         </ScrollReveal>
         <ScrollReveal direction="right" delay={140}>

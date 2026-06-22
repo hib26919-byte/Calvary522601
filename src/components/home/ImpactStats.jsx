@@ -3,8 +3,8 @@ import { useLanguage } from "../../context/LanguageContext";
 import "./ImpactStats.css";
 
 const STATS = [
-  { label_en: "Years of Ministry", label_te: "సేవా సంవత్సరాలు", value: 25, suffix: "+" },
-  { label_en: "Villages Reached", label_te: "చేరిన గ్రామాలు", value: 30, suffix: "+" },
+  { label_en: "Years of Ministry", label_te: "సేవా సంవత్సరాలు", value: 8, suffix: "+" },
+  { label_en: "Villages Reached", label_te: "చేరిన గ్రామాలు", value: 50, suffix: "+" },
   { label_en: "Families Blessed", label_te: "ఆశీర్వదించిన కుటుంబాలు", value: 500, suffix: "+" },
   { label_en: "Children Served", label_te: "సేవించిన పిల్లలు", value: 1000, suffix: "+" }
 ];

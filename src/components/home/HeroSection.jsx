@@ -34,7 +34,7 @@ export default function HeroSection({ data }) {
 
       <div className="hero__layout hero__layout--single">
         <div className="hero__content hero__content--center">
-          <div className="hero__badge"><span className="hero__badge-dot" /> Calvary Prema Ministries - Since 2000</div>
+          <div className="hero__badge"><span className="hero__badge-dot" /> Calvary Prema Ministries - Since 2018</div>
           <p className="hero__kicker">{language === "te" ? "విశ్వాసం • సేవ • మార్గదర్శకత్వం" : "Faith • Service • Guidance"}</p>
           <h1 className="hero__title">{heroTitle}</h1>
           <p className="hero__subtitle">{heroSubtitle}</p>

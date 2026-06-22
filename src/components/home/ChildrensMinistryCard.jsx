@@ -4,7 +4,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import ScrollReveal from "../common/ScrollReveal";
 import "./OutreachCard.css";
 
-const CHILDREN_IMAGE_URL = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1100&q=80";
+const CHILDREN_IMAGE_URL = "children-ministry.webp";
 const CONTENT = {
   badge_en: "Faith Formation",
   badge_te: "విశ్వాస పెంపకం",

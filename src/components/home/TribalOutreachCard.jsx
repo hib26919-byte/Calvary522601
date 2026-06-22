@@ -4,7 +4,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import ScrollReveal from "../common/ScrollReveal";
 import "./OutreachCard.css";
 
-const TRIBAL_IMAGE_URL = "https://images.unsplash.com/photo-1583321500900-82807e458f3c?auto=format&fit=crop&w=1100&q=80";
+const TRIBAL_IMAGE_URL = "/calvarypremanrt.webp";
 const CONTENT = {
   badge_en: "Ministry Focus",
   badge_te: "పరిచర్య దృష్టి",
@@ -13,11 +13,11 @@ const CONTENT = {
   desc_en: "Our tribal outreach carries forward the torch lit by Ravi Children & Tribal Ministry, bringing the love of Christ to remote tribal villages across Andhra Pradesh through prayer, presence, and compassionate support.",
   desc_te: "రవి చిల్డ్రన్ & ట్రైబల్ మినిస్ట్రీ వెలిగించిన జ్యోతిని ముందుకు తీసుకెళ్తూ, ఆంధ్రప్రదేశ్‌లోని మారుమూల గిరిజన గ్రామాలకు ప్రార్థన, సమీపం మరియు ప్రేమతో సహాయం అందిస్తున్నాం.",
   stat1_en: "30+ Villages",
-  stat1_te: "30+ గ్రామాలు",
+  stat1_te: "50+ గ్రామాలు",
   stat2_en: "500+ Families",
   stat2_te: "500+ కుటుంబాలు",
   stat3_en: "Since 2000",
-  stat3_te: "2000 నుండి",
+  stat3_te: "2018 నుండి",
   cta_en: "Learn About Tribal Outreach",
   cta_te: "గిరిజన సేవ గురించి తెలుసుకోండి"
 };

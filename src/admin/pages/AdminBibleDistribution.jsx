@@ -1,29 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { uploadToImgBB, validateImageFile } from "../../lib/imgbb";
 import { FALLBACK_HOME_SECTIONS } from "../../lib/dynamicContent";
 import ImageUploader from "../components/ImageUploader";
-
-const EMPTY_ENTRY = {
-  title_en: "",
-  title_te: "",
-  subtitle_en: "",
-  subtitle_te: "",
-  description_en: "",
-  description_te: "",
-  date: "",
-  location_en: "",
-  location_te: "",
-  category: "",
-  status: "active",
-  sortOrder: 50,
-  imageURL: "",
-  thumbURL: "",
-  originalSize: null,
-  optimizedSize: null,
-  optimizedType: ""
-};
 
 const FALLBACK_BIBLE_CARD = FALLBACK_HOME_SECTIONS.find((section) => section.id === "bible-distribution") || {};
 
@@ -46,9 +26,16 @@ const EMPTY_HOME_CARD = {
 
 export default function AdminBibleDistribution() {
   const [entries, setEntries] = useState([]);
-  const [entryForm, setEntryForm] = useState(EMPTY_ENTRY);
+  const [pendingFiles, setPendingFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
+  
   const [editingId, setEditingId] = useState(null);
-  const [savingEntry, setSavingEntry] = useState(false);
+  const [editDescription, setEditDescription] = useState("");
+  
+  const [replacingId, setReplacingId] = useState(null);
+  const [replacingProgress, setReplacingProgress] = useState(null);
+
   const [homeCard, setHomeCard] = useState(EMPTY_HOME_CARD);
   const [homeSaved, setHomeSaved] = useState(false);
 
@@ -62,10 +49,11 @@ export default function AdminBibleDistribution() {
   async function fetchEntries() {
     const snap = await getDocs(collection(db, "bibleDistribution"));
     const nextEntries = snap.docs.map((entryDoc) => ({ id: entryDoc.id, ...entryDoc.data() }));
+    // Sort by order/sortOrder descending by default so new ones show at top in admin too
     nextEntries.sort((a, b) => {
-      const order = Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
-      if (order !== 0) return order;
-      return String(b.date || "").localeCompare(String(a.date || ""));
+      const orderA = a.sortOrder !== undefined ? a.sortOrder : (a.order !== undefined ? a.order : 0);
+      const orderB = b.sortOrder !== undefined ? b.sortOrder : (b.order !== undefined ? b.order : 0);
+      return Number(orderB) - Number(orderA);
     });
     setEntries(nextEntries);
   }
@@ -75,84 +63,14 @@ export default function AdminBibleDistribution() {
     setHomeCard({ ...EMPTY_HOME_CARD, ...(snap.exists() ? snap.data() : {}) });
   }
 
-  function updateEntry(field, value) {
-    setEntryForm((prev) => ({ ...prev, [field]: value }));
-  }
-
   function updateHomeCard(field, value) {
     setHomeCard((prev) => ({ ...prev, [field]: value }));
-  }
-
-  async function uploadEntryImage(file, options = {}) {
-    validateImageFile(file);
-    const result = await uploadToImgBB(file, "bible_distribution_entry", options);
-    setEntryForm((prev) => ({
-      ...prev,
-      imageURL: result.url,
-      thumbURL: result.thumbUrl,
-      originalSize: result.originalSize || null,
-      optimizedSize: result.optimizedSize || result.compressedSize || null,
-      optimizedType: result.optimizedType || result.compressedType || ""
-    }));
   }
 
   async function uploadHomeImage(file, options = {}) {
     validateImageFile(file);
     const result = await uploadToImgBB(file, "bible_distribution_home_card", options);
     updateHomeCard("imageURL", result.url);
-  }
-
-  function resetEntryForm() {
-    setEditingId(null);
-    setEntryForm(EMPTY_ENTRY);
-  }
-
-  function editEntry(entry) {
-    setEditingId(entry.id);
-    setEntryForm({
-      ...EMPTY_ENTRY,
-      ...entry,
-      sortOrder: Number(entry.sortOrder || 0)
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  async function saveEntry() {
-    const title = entryForm.title_en.trim();
-    if (!title) return alert("Please enter a title.");
-    if (!entryForm.description_en.trim()) return alert("Please enter a description.");
-    if (!entryForm.imageURL) return alert("Please upload or paste an image URL.");
-
-    const payload = {
-      ...entryForm,
-      title_en: title,
-      description_en: entryForm.description_en.trim(),
-      sortOrder: Number(entryForm.sortOrder) || 0,
-      updatedAt: serverTimestamp()
-    };
-
-    setSavingEntry(true);
-    try {
-      if (editingId) {
-        await setDoc(doc(db, "bibleDistribution", editingId), payload, { merge: true });
-      } else {
-        await addDoc(collection(db, "bibleDistribution"), {
-          ...payload,
-          createdAt: serverTimestamp()
-        });
-        await addDoc(collection(db, "notifications"), {
-          type: "bibleDistribution",
-          title: "Bible distribution entry added",
-          message: `"${title}" was added to the Bible Distribution page.`,
-          read: false,
-          createdAt: serverTimestamp()
-        });
-      }
-      resetEntryForm();
-      await fetchEntries();
-    } finally {
-      setSavingEntry(false);
-    }
   }
 
   async function saveHomeCard() {
@@ -167,62 +85,404 @@ export default function AdminBibleDistribution() {
     setTimeout(() => setHomeSaved(false), 2400);
   }
 
+  // Handle file selections for multi-upload
+  function handleFileSelect(files) {
+    const nextPending = [...pendingFiles];
+    for (const file of Array.from(files || [])) {
+      try {
+        validateImageFile(file);
+        nextPending.push({
+          id: `${file.name}-${Date.now()}-${Math.random()}`,
+          file,
+          description: "",
+          previewUrl: URL.createObjectURL(file)
+        });
+      } catch (err) {
+        alert(`${file.name}: ${err.message}`);
+      }
+    }
+    setPendingFiles(nextPending);
+  }
+
+  function handlePendingDescriptionChange(id, value) {
+    setPendingFiles((prev) => prev.map((item) => item.id === id ? { ...item, description: value } : item));
+  }
+
+  function removePendingFile(id) {
+    setPendingFiles((prev) => {
+      const target = prev.find((item) => item.id === id);
+      if (target?.previewUrl) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+      return prev.filter((item) => item.id !== id);
+    });
+  }
+
+  function clearPendingQueue() {
+    pendingFiles.forEach((item) => {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    });
+    setPendingFiles([]);
+  }
+
+  // Upload and Save all pending files
+  async function handleUploadAll() {
+    if (!pendingFiles.length) return;
+    setUploading(true);
+    
+    for (let i = 0; i < pendingFiles.length; i++) {
+      const item = pendingFiles[i];
+      try {
+        setUploadProgress({
+          percent: 0,
+          message: `Optimizing and uploading image ${i + 1} of ${pendingFiles.length}...`
+        });
+        
+        const result = await uploadToImgBB(item.file, `bible_distribution_entry_${Date.now()}`, {
+          onProgress: (p) => setUploadProgress({
+            percent: p.percent,
+            message: `Uploading image ${i + 1} of ${pendingFiles.length}: ${p.message || ""}`
+          })
+        });
+
+        const desc = item.description.trim();
+        const payload = {
+          imageURL: result.url,
+          thumbURL: result.thumbUrl,
+          description: desc,
+          description_en: desc, // backup for standard localized rendering
+          status: "active",
+          sortOrder: Date.now() + i, // ascending sequence representation
+          order: Date.now() + i,
+          originalSize: result.originalSize || null,
+          optimizedSize: result.optimizedSize || result.compressedSize || null,
+          optimizedType: result.optimizedType || result.compressedType || "",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        };
+
+        await addDoc(collection(db, "bibleDistribution"), payload);
+
+        await addDoc(collection(db, "notifications"), {
+          type: "bibleDistribution",
+          title: "Bible distribution entry added",
+          message: `A new photo was added to the Bible Distribution gallery: "${desc || "No description"}".`,
+          read: false,
+          createdAt: serverTimestamp()
+        });
+      } catch (err) {
+        alert(`Upload failed for ${item.file.name}: ${err.message}`);
+      }
+    }
+    
+    clearPendingQueue();
+    setUploading(false);
+    setUploadProgress(null);
+    await fetchEntries();
+  }
+
+  // Inline edit functions
+  function startEdit(entry) {
+    setEditingId(entry.id);
+    setEditDescription(entry.description || entry.description_en || "");
+  }
+
+  async function saveDescriptionEdit(id) {
+    try {
+      const desc = editDescription.trim();
+      await updateDoc(doc(db, "bibleDistribution", id), {
+        description: desc,
+        description_en: desc,
+        updatedAt: serverTimestamp()
+      });
+      setEntries((prev) => prev.map((item) => item.id === id ? { ...item, description: desc, description_en: desc } : item));
+      setEditingId(null);
+    } catch (err) {
+      alert(`Failed to save description: ${err.message}`);
+    }
+  }
+
+  // Replace image
+  async function handleReplaceImage(id, file) {
+    if (!file) return;
+    try {
+      validateImageFile(file);
+      setReplacingId(id);
+      setReplacingProgress({ percent: 0, message: "Preparing image..." });
+      
+      const result = await uploadToImgBB(file, `bible_distribution_replace_${Date.now()}`, {
+        onProgress: (p) => setReplacingProgress(p)
+      });
+      
+      await updateDoc(doc(db, "bibleDistribution", id), {
+        imageURL: result.url,
+        thumbURL: result.thumbUrl,
+        originalSize: result.originalSize || null,
+        optimizedSize: result.optimizedSize || result.compressedSize || null,
+        optimizedType: result.optimizedType || result.compressedType || null,
+        updatedAt: serverTimestamp()
+      });
+      
+      await fetchEntries();
+    } catch (err) {
+      alert(`Replace failed: ${err.message}`);
+    } finally {
+      setReplacingId(null);
+      setReplacingProgress(null);
+    }
+  }
+
+  // Toggle active/inactive
+  async function toggleStatus(entry) {
+    const nextStatus = entry.status === "inactive" ? "active" : "inactive";
+    try {
+      await updateDoc(doc(db, "bibleDistribution", entry.id), {
+        status: nextStatus,
+        updatedAt: serverTimestamp()
+      });
+      setEntries((prev) => prev.map((item) => item.id === entry.id ? { ...item, status: nextStatus } : item));
+    } catch (err) {
+      alert(`Failed to update status: ${err.message}`);
+    }
+  }
+
+  // Delete entry
   async function deleteEntry(entry) {
-    if (!window.confirm(`Delete "${entry.title_en || "this entry"}"?`)) return;
-    await deleteDoc(doc(db, "bibleDistribution", entry.id));
-    setEntries((prev) => prev.filter((item) => item.id !== entry.id));
+    if (!window.confirm("Delete this gallery entry? This cannot be undone.")) return;
+    try {
+      await deleteDoc(doc(db, "bibleDistribution", entry.id));
+      setEntries((prev) => prev.filter((item) => item.id !== entry.id));
+    } catch (err) {
+      alert(`Failed to delete: ${err.message}`);
+    }
   }
 
   return (
     <div>
       <div className="admin-section-header">
-        <h2>Bible Distribution</h2>
-        <p>Manage Bible distribution images, details, ordering, visibility, and the home page card.</p>
+        <h2>Bible Distribution Gallery</h2>
+        <p>Upload photos of Bible distributions, add descriptions, manage entries, and control what appears in the public gallery.</p>
       </div>
 
       <div className="admin-kpi-grid">
-        <div className="admin-kpi-card" style={{ "--kpi-color": "#4B168C" }}><div className="admin-kpi-card__value">{entries.length}</div><div className="admin-kpi-card__label">Total Entries</div></div>
-        <div className="admin-kpi-card" style={{ "--kpi-color": "#2FB7B2" }}><div className="admin-kpi-card__value">{activeCount}</div><div className="admin-kpi-card__label">Active Entries</div></div>
-      </div>
-
-      <div className="admin-card">
-        <h3 className="admin-card__title">{editingId ? "Edit Bible Distribution Entry" : "Add Bible Distribution Entry"}</h3>
-        <div className="admin-form-grid">
-          <Input label="Title (English)" value={entryForm.title_en} onChange={(v) => updateEntry("title_en", v)} />
-          <Input label="Title (Telugu)" value={entryForm.title_te} onChange={(v) => updateEntry("title_te", v)} lang="te" />
-          <Input label="Subtitle (English)" value={entryForm.subtitle_en} onChange={(v) => updateEntry("subtitle_en", v)} />
-          <Input label="Subtitle (Telugu)" value={entryForm.subtitle_te} onChange={(v) => updateEntry("subtitle_te", v)} lang="te" />
-          <Area label="Description (English)" value={entryForm.description_en} onChange={(v) => updateEntry("description_en", v)} />
-          <Area label="Description (Telugu)" value={entryForm.description_te} onChange={(v) => updateEntry("description_te", v)} lang="te" />
-          <Input label="Date" type="date" value={entryForm.date} onChange={(v) => updateEntry("date", v)} />
-          <Input label="Location (English)" value={entryForm.location_en} onChange={(v) => updateEntry("location_en", v)} />
-          <Input label="Location (Telugu)" value={entryForm.location_te} onChange={(v) => updateEntry("location_te", v)} lang="te" />
-          <Input label="Category (optional)" value={entryForm.category} onChange={(v) => updateEntry("category", v)} />
-          <Input label="Display Order" type="number" value={entryForm.sortOrder} onChange={(v) => updateEntry("sortOrder", v)} />
-          <div className="admin-form-group">
-            <label>Status</label>
-            <select className="admin-select" value={entryForm.status} onChange={(e) => updateEntry("status", e.target.value)}>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-          <div className="admin-form-group admin-form-group--full">
-            <label>Image</label>
-            <ImageUploader
-              currentUrl={entryForm.imageURL}
-              onUpload={uploadEntryImage}
-              onUrlChange={(url) => updateEntry("imageURL", url)}
-              label="Upload Bible Distribution Image"
-            />
-          </div>
+        <div className="admin-kpi-card" style={{ "--kpi-color": "#4B168C" }}>
+          <div className="admin-kpi-card__value">{entries.length}</div>
+          <div className="admin-kpi-card__label">Total Images</div>
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
-          <button className="admin-btn admin-btn--primary" onClick={saveEntry} disabled={savingEntry}>{savingEntry ? "Saving..." : editingId ? "Save Entry" : "Add Entry"}</button>
-          {editingId && <button className="admin-btn admin-btn--ghost" onClick={resetEntryForm}>Cancel Edit</button>}
+        <div className="admin-kpi-card" style={{ "--kpi-color": "#2FB7B2" }}>
+          <div className="admin-kpi-card__value">{activeCount}</div>
+          <div className="admin-kpi-card__label">Active Images</div>
         </div>
       </div>
 
+      {/* Upload Zone & Pending Queue Card */}
       <div className="admin-card">
+        <h3 className="admin-card__title">Add Bible Distribution Images</h3>
+        
+        <div
+          className="admin-upload-zone"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); handleFileSelect(e.dataTransfer.files); }}
+          onClick={() => !uploading && document.getElementById("multi-file-input").click()}
+          style={{
+            cursor: uploading ? "not-allowed" : "pointer",
+            border: "2px dashed var(--color-primary)",
+            borderRadius: 12,
+            padding: 32,
+            textAlign: "center",
+            background: "#f8f6fc",
+            transition: "0.2s"
+          }}
+        >
+          <input
+            id="multi-file-input"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            hidden
+            disabled={uploading}
+            onChange={(e) => handleFileSelect(e.target.files)}
+          />
+          <strong>Select Multiple Images</strong>
+          <p style={{ margin: "4px 0 0", color: "#666", fontSize: 13 }}>
+            Drag & drop images here, or click to browse. Supports JPG, PNG, JPEG, and WebP.
+          </p>
+        </div>
+
+        {pendingFiles.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <h4 style={{ fontWeight: "bold", color: "var(--color-primary-dark)" }}>Pending Images ({pendingFiles.length})</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16, marginTop: 12 }}>
+              {pendingFiles.map((item) => (
+                <div key={item.id} style={{ display: "flex", flexDirection: "column", border: "1px solid #e5e1eb", borderRadius: 8, background: "white", padding: 12, gap: 10 }}>
+                  <img
+                    src={item.previewUrl}
+                    alt="Pending preview"
+                    style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 4 }}
+                  />
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: 12, fontWeight: "bold" }}>Description</label>
+                    <textarea
+                      className="admin-textarea"
+                      rows={2}
+                      placeholder="e.g. Bible distribution in tribal villages"
+                      value={item.description}
+                      onChange={(e) => handlePendingDescriptionChange(item.id, e.target.value)}
+                      style={{ fontSize: 13 }}
+                    />
+                  </div>
+                  <button
+                    className="admin-btn admin-btn--sm admin-btn--danger"
+                    onClick={() => removePendingFile(item.id)}
+                    disabled={uploading}
+                    style={{ minHeight: "auto", padding: "6px 12px", width: "fit-content", alignSelf: "flex-end" }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+              <button
+                className="admin-btn admin-btn--primary"
+                onClick={handleUploadAll}
+                disabled={uploading}
+              >
+                {uploading ? uploadProgress?.message || "Uploading..." : "Save and Upload All"}
+              </button>
+              <button
+                className="admin-btn admin-btn--ghost"
+                onClick={clearPendingQueue}
+                disabled={uploading}
+              >
+                Clear Queue
+              </button>
+            </div>
+            {uploading && uploadProgress && (
+              <div style={{ marginTop: 12 }}>
+                <progress value={uploadProgress.percent || 0} max="100" style={{ width: "100%" }} />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Entries Table Card */}
+      <div className="admin-card" style={{ marginTop: 24 }}>
+        <h3 className="admin-card__title">Uploaded Gallery Entries</h3>
+        
+        <div style={{ overflowX: "auto" }}>
+          <table className="admin-table" style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
+            <thead>
+              <tr style={{ background: "var(--color-primary-dark)", color: "white", textAlign: "left" }}>
+                <th style={{ padding: "12px 16px", border: "1px solid #e5e1eb", width: 120 }}>Image</th>
+                <th style={{ padding: "12px 16px", border: "1px solid #e5e1eb" }}>Description</th>
+                <th style={{ padding: "12px 16px", border: "1px solid #e5e1eb", width: 120, textAlign: "center" }}>Status</th>
+                <th style={{ padding: "12px 16px", border: "1px solid #e5e1eb", width: 200 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: 24, textAlign: "center", color: "var(--color-text-muted)" }}>
+                    No entries found. Select some images above to upload.
+                  </td>
+                </tr>
+              ) : (
+                entries.map((entry) => {
+                  const isEditing = editingId === entry.id;
+                  const isReplacing = replacingId === entry.id;
+                  return (
+                    <tr key={entry.id} style={{ borderBottom: "1px solid #e5e1eb", background: "rgba(255,255,255,0.72)" }}>
+                      <td style={{ padding: 12, border: "1px solid #e5e1eb", verticalAlign: "middle" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
+                          <img
+                            src={entry.thumbURL || entry.thumbUrl || entry.imageURL}
+                            alt="Bible distribution preview"
+                            style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 4, border: "1px solid #e5e1eb" }}
+                          />
+                          <button
+                            className="admin-btn admin-btn--sm admin-btn--ghost"
+                            onClick={() => document.getElementById(`replace-file-${entry.id}`).click()}
+                            disabled={isReplacing || uploading}
+                            style={{ fontSize: 11, padding: "4px 8px", minHeight: "auto" }}
+                          >
+                            {isReplacing ? "Replacing..." : "Replace"}
+                          </button>
+                          <input
+                            id={`replace-file-${entry.id}`}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                            onChange={(e) => handleReplaceImage(entry.id, e.target.files?.[0])}
+                          />
+                          {isReplacing && (
+                            <span style={{ fontSize: 10, color: "var(--color-primary)" }}>
+                              {replacingProgress?.percent || 0}%
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td style={{ padding: 12, border: "1px solid #e5e1eb", verticalAlign: "middle" }}>
+                        {isEditing ? (
+                          <textarea
+                            className="admin-textarea"
+                            rows={3}
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            style={{ width: "100%", boxSizing: "border-box" }}
+                          />
+                        ) : (
+                          <p style={{ margin: 0, fontSize: 14, whiteSpace: "pre-wrap" }}>
+                            {entry.description || entry.description_en || "(No description)"}
+                          </p>
+                        )}
+                      </td>
+                      <td style={{ padding: 12, border: "1px solid #e5e1eb", verticalAlign: "middle", textAlign: "center" }}>
+                        <button
+                          className={`admin-btn admin-btn--sm`}
+                          onClick={() => toggleStatus(entry)}
+                          style={{
+                            minHeight: "auto",
+                            padding: "6px 12px",
+                            fontSize: 12,
+                            background: entry.status !== "inactive" ? "#2FB7B2" : "#a19fa6",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 16,
+                            cursor: "pointer"
+                          }}
+                        >
+                          {entry.status !== "inactive" ? "Active" : "Inactive"}
+                        </button>
+                      </td>
+                      <td style={{ padding: 12, border: "1px solid #e5e1eb", verticalAlign: "middle" }}>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          {isEditing ? (
+                            <>
+                              <button className="admin-btn admin-btn--sm admin-btn--primary" onClick={() => saveDescriptionEdit(entry.id)}>Save</button>
+                              <button className="admin-btn admin-btn--sm admin-btn--ghost" onClick={() => setEditingId(null)}>Cancel</button>
+                            </>
+                          ) : (
+                            <>
+                              <button className="admin-btn admin-btn--sm admin-btn--ghost" onClick={() => startEdit(entry)}>Edit</button>
+                              <button className="admin-btn admin-btn--sm admin-btn--danger" onClick={() => deleteEntry(entry)}>Delete</button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Legacy Home Card Settings Card */}
+      <div className="admin-card" style={{ marginTop: 24 }}>
         <h3 className="admin-card__title">Home Page Bible Distribution Card</h3>
         <div className="admin-form-grid">
           <Input label="Title (English)" value={homeCard.title_en} onChange={(v) => updateHomeCard("title_en", v)} />
@@ -258,26 +518,6 @@ export default function AdminBibleDistribution() {
           </div>
         </div>
         <button className={`admin-btn admin-btn--primary ${homeSaved ? "admin-btn--success" : ""}`} onClick={saveHomeCard}>{homeSaved ? "Saved" : "Save Home Card"}</button>
-      </div>
-
-      <div className="admin-gallery-grid">
-        {entries.map((entry) => (
-          <article key={entry.id} className="admin-gallery-item">
-            <img src={entry.thumbURL || entry.thumbUrl || entry.imageURL} alt={entry.title_en || "Bible distribution"} loading="lazy" />
-            <div className="admin-gallery-item__body">
-              <strong>{entry.title_en}</strong>
-              <p>{entry.description_en}</p>
-              <small>{entry.date || "No date"} {entry.location_en ? `| ${entry.location_en}` : ""}</small>
-              <small>{entry.status === "inactive" ? "Inactive" : "Active"} | Order {entry.sortOrder || 0}</small>
-              {(entry.optimizedSize || entry.compressedSize) && <small>{Math.round((entry.optimizedSize || entry.compressedSize) / 1024)} KB optimized</small>}
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button className="admin-btn admin-btn--sm admin-btn--ghost" onClick={() => editEntry(entry)}>Edit</button>
-                <button className="admin-btn admin-btn--sm admin-btn--danger" onClick={() => deleteEntry(entry)}>Delete</button>
-                <a className="admin-btn admin-btn--sm admin-btn--ghost" href={entry.imageURL} target="_blank" rel="noopener noreferrer">View</a>
-              </div>
-            </div>
-          </article>
-        ))}
       </div>
     </div>
   );

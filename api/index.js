@@ -8,6 +8,7 @@ import galleryRoutes from "./routes/gallery.js";
 import bannerRoutes from "./routes/banner.js";
 import chatbotRoutes from "./routes/chatbot.js";
 import analyticsRoutes from "./routes/analytics.js";
+import bibleDistributionRoutes from "./routes/bibleDistribution.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/api/gallery", galleryRoutes);
 app.use("/api/banner", bannerRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/bible-distribution", bibleDistributionRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 app.use((err, req, res, next) => {

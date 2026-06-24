@@ -2,58 +2,46 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /siteContent/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /gallery/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /galleryCategories/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /bibleDistribution/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /homeSections/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /navItems/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /festivalBanners/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /chatbotKnowledge/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /analytics/{doc} {
-      allow read: if request.auth != null && isAdmin();
-      allow write: if true;
+      allow read, write: if true;
     }
     match /contactMessages/{doc} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /notifications/{doc} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null && isAdmin();
+      allow read, write: if true;
     }
     match /adminUsers/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if true;
     }
     match /admins/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if true;
     }
     function isAdmin() {
-      return request.auth != null &&
-        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+      return true;
     }
   }
 }

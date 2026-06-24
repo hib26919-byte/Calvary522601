@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { addDoc, collection, deleteDoc, doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { uploadToImgBB, validateImageFile } from "../../lib/imgbb";
-import { DEFAULT_GALLERY_CATEGORIES, findGalleryCategory } from "../../lib/galleryCategories";
+import { activeGalleryCategories, findGalleryCategory, normalizeGalleryCategory, sortGalleryCategories } from "../../lib/galleryCategories";
 import ImageUploader from "../components/ImageUploader";
 import RichTextEditor from "../components/RichTextEditor";
 import SlideshowManager from "../components/SlideshowManager";
@@ -21,8 +21,20 @@ export default function AdminPages() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [galleryCategories, setGalleryCategories] = useState([]);
+  const [galleryUploadCategoryId, setGalleryUploadCategoryId] = useState("");
 
   useEffect(() => { fetchPage(activeTab); }, [activeTab]);
+  useEffect(() => { fetchGalleryCategories(); }, []);
+  useEffect(() => {
+    const activeCategories = activeGalleryCategories(galleryCategories);
+    if (!activeCategories.length) return;
+    const pageCategoryId = pageData.galleryCategoryId;
+    setGalleryUploadCategoryId((prev) => {
+      if (pageCategoryId && activeCategories.some((category) => category.id === pageCategoryId)) return pageCategoryId;
+      return activeCategories.some((category) => category.id === prev) ? prev : activeCategories[0].id;
+    });
+  }, [galleryCategories, pageData.galleryCategoryId]);
 
   async function fetchPage(pageId) {
     setLoading(true);
@@ -36,6 +48,12 @@ export default function AdminPages() {
 
   const update = (field, value) => setPageData((prev) => ({ ...prev, [field]: value }));
   const updateFields = (fields) => setPageData((prev) => ({ ...prev, ...fields }));
+
+  async function fetchGalleryCategories() {
+    const snap = await getDocs(collection(db, "galleryCategories"));
+    const nextCategories = snap.docs.map((categoryDoc, index) => normalizeGalleryCategory({ id: categoryDoc.id, ...categoryDoc.data() }, index));
+    setGalleryCategories(sortGalleryCategories(nextCategories));
+  }
 
   async function savePage() {
     setSaving(true);
@@ -64,19 +82,22 @@ export default function AdminPages() {
 
   async function uploadPageGalleryImage(file) {
     validateImageFile(file);
-    const category = activeTab === "tribalPage" ? "tribal" : "children";
-    const galleryCategory = findGalleryCategory(DEFAULT_GALLERY_CATEGORIES, category);
-    const result = await uploadToImgBB(file, `${category}_gallery`);
+    const galleryCategory = findGalleryCategory(galleryCategories, galleryUploadCategoryId);
+    if (!galleryCategory) {
+      alert("Please add and select an active gallery category before uploading.");
+      return;
+    }
+    const result = await uploadToImgBB(file, `${galleryCategory.slug}_gallery`);
     await addDoc(collection(db, "gallery"), {
       imageURL: result.url,
       thumbURL: result.thumbUrl,
-      caption_en: activeTab === "tribalPage" ? "Tribal Outreach" : "Children's Ministry",
-      caption_te: activeTab === "tribalPage" ? "గిరిజన సేవ" : "పిల్లల పరిచర్య",
+      caption_en: galleryCategory.categoryName,
+      caption_te: "",
       about_en: "",
       about_te: "",
-      categoryId: galleryCategory?.id || category,
-      category,
-      categoryName: galleryCategory?.categoryName || category,
+      categoryId: galleryCategory.id,
+      category: galleryCategory.slug,
+      categoryName: galleryCategory.categoryName,
       originalSize: result.originalSize || null,
       optimizedSize: result.optimizedSize || result.compressedSize || null,
       optimizedType: result.optimizedType || result.compressedType || null,
@@ -86,11 +107,11 @@ export default function AdminPages() {
     await addDoc(collection(db, "notifications"), {
       type: "gallery",
       title: "New image uploaded",
-      message: `A new image was uploaded from ${activeTab === "tribalPage" ? "Tribal Outreach" : "Children's Ministry"} admin section.`,
+      message: `A new image was uploaded to ${galleryCategory.categoryName}.`,
       read: false,
       createdAt: serverTimestamp()
     });
-    alert("Gallery image uploaded to the correct section.");
+    alert("Gallery image uploaded to the selected category.");
   }
 
   return (
@@ -179,11 +200,35 @@ export default function AdminPages() {
 
           {(activeTab === "tribalPage" || activeTab === "childrensPage") && (
             <div className="admin-card">
-              <h3 className="admin-card__title">Upload Gallery Image to This Ministry Section</h3>
+              <h3 className="admin-card__title">Quick Gallery Upload</h3>
               <p style={{ color: "var(--color-text-muted)", marginBottom: 12 }}>
-                This upload is automatically assigned to {activeTab === "tribalPage" ? "Tribal Outreach" : "Children's Ministry"} gallery category.
+                Select one of the active Gallery Categories managed in the Gallery module.
               </p>
-              <input className="admin-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && uploadPageGalleryImage(e.target.files[0])} />
+              {activeGalleryCategories(galleryCategories).length === 0 ? (
+                <p style={{ color: "var(--color-text-muted)" }}>Add an active gallery category before using quick upload.</p>
+              ) : (
+                <div className="admin-form-grid">
+                  <div className="admin-form-group">
+                    <label>Gallery Category</label>
+                    <select
+                      className="admin-select"
+                      value={galleryUploadCategoryId}
+                      onChange={(e) => {
+                        setGalleryUploadCategoryId(e.target.value);
+                        update("galleryCategoryId", e.target.value);
+                      }}
+                    >
+                      {activeGalleryCategories(galleryCategories).map((category) => (
+                        <option key={category.id} value={category.id}>{category.categoryName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="admin-form-group">
+                    <label>Image</label>
+                    <input className="admin-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && uploadPageGalleryImage(e.target.files[0])} />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -30,7 +30,7 @@ export default function TribalOutreachPage() {
         fallbackTone="tribal"
       />
       <ImpactStats />
-      <section className="section section--soft"><div className="container"><h2 className="section-title">{language === "te" ? "గిరిజన సేవ ఫోటోలు" : "Tribal Outreach Photos"}</h2><GalleryGrid category="tribal" /></div></section>
+      <section className="section section--soft"><div className="container"><h2 className="section-title">{language === "te" ? "గిరిజన సేవ ఫోటోలు" : "Tribal Outreach Photos"}</h2><GalleryGrid category={tribalPage?.galleryCategoryId} /></div></section>
     </main>
   );
 }

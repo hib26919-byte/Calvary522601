@@ -2,13 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useContent } from "../../context/ContentContext";
+import { buildNavTree, localizeDynamic } from "../../lib/dynamicContent";
 import "./Footer.css";
 
 export default function Footer() {
-  const { ts } = useLanguage();
-  const { globalSettings } = useContent();
+  const { ts, language } = useLanguage();
+  const { globalSettings, navItems } = useContent();
   const year = new Date().getFullYear();
   const socials = globalSettings?.socialLinks || {};
+  const footerLinks = buildNavTree(navItems)
+    .flatMap((item) => [item, ...(item.dropdown || [])])
+    .filter((item) => item.path && item.path !== "/")
+    .slice(0, 8);
 
   return (
     <footer className="footer">
@@ -24,11 +29,9 @@ export default function Footer() {
           <div className="footer__nav">
             <h4>Ministry</h4>
             <ul>
-              <li><Link to="/about">About Us</Link></li>
-              <li><Link to="/tribal-outreach">Tribal Outreach</Link></li>
-              <li><Link to="/childrens-ministry">Children's Ministry</Link></li>
-              <li><Link to="/gallery">Gallery</Link></li>
-              <li><Link to="/contact">Contact</Link></li>
+              {footerLinks.map((item) => (
+                <li key={item.id}><Link to={item.path}>{localizeDynamic(item, "label", language, ts)}</Link></li>
+              ))}
             </ul>
           </div>
           <div className="footer__contact">

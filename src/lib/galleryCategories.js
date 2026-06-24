@@ -1,10 +1,3 @@
-export const DEFAULT_GALLERY_CATEGORIES = [
-  { id: "tribal", categoryName: "Tribal Outreach", slug: "tribal", status: "active", sortOrder: 10, color: "#6D28D9", icon: "" },
-  { id: "children", categoryName: "Children's Ministry", slug: "children", status: "active", sortOrder: 20, color: "#B83280", icon: "" },
-  { id: "church", categoryName: "Church", slug: "church", status: "active", sortOrder: 30, color: "#4B168C", icon: "" },
-  { id: "events", categoryName: "Events", slug: "events", status: "active", sortOrder: 40, color: "#2FB7B2", icon: "" }
-];
-
 export function slugifyCategoryName(value = "") {
   return value
     .toString()

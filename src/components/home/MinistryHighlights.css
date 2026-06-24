@@ -1,9 +1,13 @@
 .ministry-highlights { background: linear-gradient(180deg, var(--color-off-white), var(--color-lavender-mist)); padding: var(--spacing-3xl) 0; }
-.ministry-highlights__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 34px; }
-.ministry-highlight-card { display: block; height: 100%; padding: 34px; border-radius: var(--radius-lg); background: var(--surface-card); box-shadow: var(--shadow-sm); border: 1px solid rgba(75,22,140,0.1); transition: transform var(--transition-bounce), box-shadow var(--transition-base); }
+.ministry-highlights__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; margin-top: 34px; }
+.ministry-highlight-card { display: grid; gap: 12px; height: 100%; padding: 18px; border-radius: var(--radius-lg); background: var(--surface-card); box-shadow: var(--shadow-sm); border: 1px solid rgba(75,22,140,0.1); transition: transform var(--transition-bounce), box-shadow var(--transition-base); overflow: hidden; }
 .ministry-highlight-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.ministry-highlight-card__icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--gradient-lavender); color: white; font-size: 26px; margin-bottom: 18px; }
-.ministry-highlight-card h3 { color: var(--color-primary-dark); margin-bottom: 10px; font-size: 1.55rem; }
-.ministry-highlight-card p { color: var(--color-text-body); line-height: 1.75; margin-bottom: 18px; }
+.ministry-highlight-card__image { display: block; aspect-ratio: 16 / 10; border-radius: var(--radius-md); overflow: hidden; background: var(--color-light-blue); }
+.ministry-highlight-card__image img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--transition-slow); }
+.ministry-highlight-card:hover .ministry-highlight-card__image img { transform: scale(1.04); }
+.ministry-highlight-card__icon { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--home-section-color, var(--color-primary)); color: white; font-size: 20px; font-family: var(--font-ui); font-weight: 900; }
+.ministry-highlight-card h3 { color: var(--color-primary-dark); font-size: 1.4rem; overflow-wrap: anywhere; }
+.ministry-highlight-card strong { color: var(--color-secondary-dark); font-family: var(--font-ui); font-size: 0.9rem; }
+.ministry-highlight-card p { color: var(--color-text-body); line-height: 1.7; }
 .ministry-highlight-card__link { color: var(--color-secondary); font-family: var(--font-ui); font-weight: 900; }
 @media (max-width: 700px) { .ministry-highlights__grid { grid-template-columns: 1fr; } }

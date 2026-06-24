@@ -18,6 +18,7 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const MinistriesPage = lazy(() => import("./pages/MinistriesPage"));
 const TribalOutreachPage = lazy(() => import("./pages/TribalOutreachPage"));
 const ChildrensMinistryPage = lazy(() => import("./pages/ChildrensMinistryPage"));
+const BibleDistributionPage = lazy(() => import("./pages/BibleDistributionPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PortfolioKranthi = lazy(() => import("./pages/PortfolioKranthi"));
@@ -28,6 +29,7 @@ const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
 const AdminHome = lazy(() => import("./admin/pages/AdminHome"));
 const AdminPages = lazy(() => import("./admin/pages/AdminPages"));
 const AdminGallery = lazy(() => import("./admin/pages/AdminGallery"));
+const AdminBibleDistribution = lazy(() => import("./admin/pages/AdminBibleDistribution"));
 const AdminFestivalBanner = lazy(() => import("./admin/pages/AdminFestivalBanner"));
 const AdminChatbot = lazy(() => import("./admin/pages/AdminChatbot"));
 const AdminMessages = lazy(() => import("./admin/pages/AdminMessages"));
@@ -62,6 +64,7 @@ export default function App() {
                 <Route path="/ministries" element={<PublicLayout><MinistriesPage /></PublicLayout>} />
                 <Route path="/tribal-outreach" element={<PublicLayout><TribalOutreachPage /></PublicLayout>} />
                 <Route path="/childrens-ministry" element={<PublicLayout><ChildrensMinistryPage /></PublicLayout>} />
+                <Route path="/bible-distribution" element={<PublicLayout><BibleDistributionPage /></PublicLayout>} />
                 <Route path="/gallery" element={<PublicLayout><GalleryPage /></PublicLayout>} />
                 <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
                 <Route path="/portfolio/kranthi" element={<PortfolioKranthi />} />
@@ -72,6 +75,7 @@ export default function App() {
                   <Route path="dashboard" element={<AdminHome />} />
                   <Route path="pages" element={<AdminPages />} />
                   <Route path="gallery" element={<AdminGallery />} />
+                  <Route path="bible-distribution" element={<AdminBibleDistribution />} />
                   <Route path="banner" element={<AdminFestivalBanner />} />
                   <Route path="chatbot" element={<AdminChatbot />} />
                   <Route path="messages" element={<AdminMessages />} />

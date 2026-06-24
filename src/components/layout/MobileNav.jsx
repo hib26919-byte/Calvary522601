@@ -1,24 +1,28 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
+import { useContent } from "../../context/ContentContext";
+import { activeNavItems, localizeDynamic } from "../../lib/dynamicContent";
 import "./MobileNav.css";
 
-const TABS = [
-  { path: "/", labelKey: "nav_home", icon: "⌂" },
-  { path: "/about", labelKey: "nav_about", icon: "✚" },
-  { path: "/tribal-outreach", labelKey: "nav_tribal", icon: "◇" },
-  { path: "/gallery", labelKey: "nav_gallery", icon: "▧" },
-  { path: "/contact", labelKey: "nav_contact", icon: "☎" }
-];
-
 export function MobileBottomNav() {
-  const { ts } = useLanguage();
+  const { ts, language } = useLanguage();
+  const { navItems } = useContent();
+  const tabs = activeNavItems(navItems)
+    .filter((item) => item.path && !item.parentId && item.bottomVisible !== false)
+    .slice(0, 5)
+    .map((item) => ({
+      path: item.path,
+      label: localizeDynamic(item, "label", language, ts),
+      icon: item.icon || localizeDynamic(item, "label", language, ts).charAt(0)
+    }));
+
   return (
     <nav className="mobile-bottom-nav" role="navigation" aria-label="Bottom Navigation">
-      {TABS.map((tab) => (
-        <NavLink key={tab.path} to={tab.path} className={({ isActive }) => `mobile-bottom-tab ${isActive ? "active" : ""}`} aria-label={ts(tab.labelKey)}>
+      {tabs.map((tab) => (
+        <NavLink key={tab.path} to={tab.path} className={({ isActive }) => `mobile-bottom-tab ${isActive ? "active" : ""}`} aria-label={tab.label}>
           <span className="mobile-bottom-tab__icon" aria-hidden="true">{tab.icon}</span>
-          <span className="mobile-bottom-tab__label">{ts(tab.labelKey)}</span>
+          <span className="mobile-bottom-tab__label">{tab.label}</span>
         </NavLink>
       ))}
     </nav>
@@ -36,7 +40,7 @@ export default function MobileNav({ isOpen, onClose, navLinks }) {
           <button className="mobile-nav-close" onClick={onClose} aria-label="Close menu">×</button>
         </div>
         <ul className="mobile-nav-links">
-          {navLinks.map((link, i) => link.dropdown ? (
+          {navLinks.map((link, i) => link.dropdown?.length ? (
             <React.Fragment key={i}>
               <li className="mobile-nav-category">{link.label}</li>
               {link.dropdown.map((sub) => <li key={sub.path}><NavLink to={sub.path} className="mobile-nav-link mobile-nav-link--sub" onClick={onClose}>{sub.label}</NavLink></li>)}

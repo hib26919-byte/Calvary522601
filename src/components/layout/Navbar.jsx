@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useContent } from "../../context/ContentContext";
+import { buildNavTree, localizeDynamic } from "../../lib/dynamicContent";
 import AnimatedLogo from "../common/AnimatedLogo";
 import LanguageSwitch from "./LanguageSwitch";
 import MobileNav from "./MobileNav";
@@ -12,8 +13,8 @@ export default function Navbar() {
   const [progress, setProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [ministriesOpen, setMinistriesOpen] = useState(false);
-  const { ts } = useLanguage();
-  const { globalSettings } = useContent();
+  const { ts, language } = useLanguage();
+  const { globalSettings, navItems } = useContent();
   const location = useLocation();
   const dropdownRef = useRef(null);
 
@@ -41,19 +42,14 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const navLinks = [
-    { path: "/", label: ts("nav_home") },
-    { path: "/about", label: ts("nav_about") },
-    {
-      label: ts("nav_ministries"),
-      dropdown: [
-        { path: "/tribal-outreach", label: ts("nav_tribal") },
-        { path: "/childrens-ministry", label: ts("nav_children") }
-      ]
-    },
-    { path: "/gallery", label: ts("nav_gallery") },
-    { path: "/contact", label: ts("nav_contact") }
-  ];
+  const navLinks = buildNavTree(navItems).map((item) => ({
+    ...item,
+    label: localizeDynamic(item, "label", language, ts),
+    dropdown: item.dropdown?.map((sub) => ({
+      ...sub,
+      label: localizeDynamic(sub, "label", language, ts)
+    })) || []
+  }));
 
   return (
     <>
@@ -65,7 +61,7 @@ export default function Navbar() {
             <span className="navbar__logo-name">{ts("footer_ministry")}</span>
           </Link>
           <ul className="navbar__links" role="list">
-            {navLinks.map((link, i) => link.dropdown ? (
+            {navLinks.map((link, i) => link.dropdown?.length ? (
               <li key={i} className="navbar__item navbar__item--dropdown" ref={dropdownRef}>
                 <button className={`navbar__link navbar__dropdown-trigger ${link.dropdown.some((d) => location.pathname === d.path) ? "active" : ""}`} onClick={() => setMinistriesOpen((v) => !v)} aria-haspopup="true" aria-expanded={ministriesOpen}>
                   {link.label}<span className={`navbar__caret ${ministriesOpen ? "open" : ""}`}>▾</span>

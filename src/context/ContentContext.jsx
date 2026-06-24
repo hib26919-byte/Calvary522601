@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { collection, doc, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { DEFAULT_GALLERY_CATEGORIES, normalizeGalleryCategory, sortGalleryCategories } from "../lib/galleryCategories";
+import { normalizeGalleryCategory, sortGalleryCategories } from "../lib/galleryCategories";
+import { mergeHomeSections, mergeNavigationItems } from "../lib/dynamicContent";
 
 const ContentContext = createContext(null);
 const PAGE_IDS = ["homePage", "aboutPage", "tribalPage", "childrensPage", "contactPage", "globalSettings"];
@@ -18,7 +19,10 @@ export function ContentProvider({ children }) {
     }
   });
   const [gallery, setGallery] = useState([]);
-  const [galleryCategories, setGalleryCategories] = useState(DEFAULT_GALLERY_CATEGORIES);
+  const [galleryCategories, setGalleryCategories] = useState([]);
+  const [navItems, setNavItems] = useState(() => mergeNavigationItems([]));
+  const [homeSections, setHomeSections] = useState(() => mergeHomeSections([]));
+  const [bibleDistribution, setBibleDistribution] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,20 +38,60 @@ export function ContentProvider({ children }) {
       (err) => console.warn(`Content fetch error for ${pageId}:`, err)
     ));
     const unsubscribeCategories = onSnapshot(
-      query(collection(db, "galleryCategories"), orderBy("sortOrder", "asc")),
+      collection(db, "galleryCategories"),
       (snap) => {
         const categories = snap.docs.map((categoryDoc, index) => normalizeGalleryCategory({ id: categoryDoc.id, ...categoryDoc.data() }, index));
-        setGalleryCategories(categories.length ? sortGalleryCategories(categories) : DEFAULT_GALLERY_CATEGORIES);
+        setGalleryCategories(sortGalleryCategories(categories));
       },
       (err) => {
         console.warn("Gallery categories fetch error:", err);
-        setGalleryCategories(DEFAULT_GALLERY_CATEGORIES);
+        setGalleryCategories([]);
+      }
+    );
+    const unsubscribeNavItems = onSnapshot(
+      collection(db, "navItems"),
+      (snap) => {
+        setNavItems(mergeNavigationItems(snap.docs.map((navDoc, index) => ({ id: navDoc.id, ...navDoc.data(), _index: index }))));
+      },
+      (err) => {
+        console.warn("Navigation fetch error:", err);
+        setNavItems(mergeNavigationItems([]));
+      }
+    );
+    const unsubscribeHomeSections = onSnapshot(
+      collection(db, "homeSections"),
+      (snap) => {
+        setHomeSections(mergeHomeSections(snap.docs.map((sectionDoc, index) => ({ id: sectionDoc.id, ...sectionDoc.data(), _index: index }))));
+      },
+      (err) => {
+        console.warn("Home sections fetch error:", err);
+        setHomeSections(mergeHomeSections([]));
+      }
+    );
+    const unsubscribeBibleDistribution = onSnapshot(
+      collection(db, "bibleDistribution"),
+      (snap) => {
+        const entries = snap.docs.map((entryDoc) => ({ id: entryDoc.id, ...entryDoc.data() }));
+        setBibleDistribution(entries.sort((a, b) => {
+          const order = Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
+          if (order !== 0) return order;
+          const dateA = a.date || "";
+          const dateB = b.date || "";
+          return dateB.localeCompare(dateA);
+        }));
+      },
+      (err) => {
+        console.warn("Bible distribution fetch error:", err);
+        setBibleDistribution([]);
       }
     );
     fetchGallery().finally(() => setLoading(false));
     return () => {
       unsubscribers.forEach((u) => u());
       unsubscribeCategories();
+      unsubscribeNavItems();
+      unsubscribeHomeSections();
+      unsubscribeBibleDistribution();
     };
   }, []);
 
@@ -71,6 +115,9 @@ export function ContentProvider({ children }) {
       globalSettings: content.globalSettings,
       gallery,
       galleryCategories,
+      navItems,
+      homeSections,
+      bibleDistribution,
       loading,
       refreshGallery: fetchGallery
     }}>

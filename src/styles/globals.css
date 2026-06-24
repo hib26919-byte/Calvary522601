@@ -121,6 +121,8 @@ button { border: 0; }
 .admin-form-group label { font-family: var(--font-ui); font-size: 13px; font-weight: 700; color: var(--color-text-body); }
 .admin-form-group--full { grid-column: 1 / -1; }
 .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.admin-check-row { display: flex; align-items: center; gap: 10px; min-height: 42px; color: var(--color-text-body); font-family: var(--font-ui); font-weight: 800; }
+.admin-check-row input { width: 18px; height: 18px; accent-color: var(--color-primary); }
 .admin-card { background: rgba(255,255,255,0.92); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid #e5e1eb; margin-bottom: 24px; backdrop-filter: blur(10px); }
 .admin-card__title { font-family: var(--font-ui); font-size: 16px; font-weight: 800; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--color-light-blue); }
 .admin-loading, .admin-empty { padding: 40px; text-align: center; color: var(--color-text-muted); font-family: var(--font-ui); }

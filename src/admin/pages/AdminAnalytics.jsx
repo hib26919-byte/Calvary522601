@@ -6,7 +6,7 @@ export default function AdminAnalytics() {
   const { analyticsData, pieData, CHART_COLORS } = useOutletContext();
   const totalVisitors = analyticsData.reduce((s, d) => s + d.visitors, 0);
   const totalChatbot = analyticsData.reduce((s, d) => s + d.chatbot, 0);
-  const totalPageViews = analyticsData.reduce((s, d) => s + d.home + d.about + d.tribal + d.children + d.gallery + d.contact, 0);
+  const totalPageViews = analyticsData.reduce((s, d) => s + d.home + d.about + d.tribal + d.children + d.bibleDistribution + d.gallery + d.contact, 0);
   const mostPopularPage = pieData.length ? pieData.reduce((a, b) => a.value > b.value ? a : b).name : "N/A";
   return (
     <div>
@@ -19,7 +19,7 @@ export default function AdminAnalytics() {
       </div>
       <div className="admin-charts-grid">
         <div className="admin-chart-card admin-chart-card--wide"><h3>Visitors Over Time</h3><ResponsiveContainer width="100%" height={240}><AreaChart data={analyticsData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="date" /><YAxis /><Tooltip /><Area dataKey="visitors" stroke="#4B168C" fill="#EEE7F8" /></AreaChart></ResponsiveContainer></div>
-        <div className="admin-chart-card admin-chart-card--wide"><h3>Page Views by Page</h3><ResponsiveContainer width="100%" height={260}><LineChart data={analyticsData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="date" /><YAxis /><Tooltip /><Legend />{["home", "about", "tribal", "children", "gallery", "contact"].map((page, i) => <Line key={page} type="monotone" dataKey={page} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} />)}</LineChart></ResponsiveContainer></div>
+        <div className="admin-chart-card admin-chart-card--wide"><h3>Page Views by Page</h3><ResponsiveContainer width="100%" height={260}><LineChart data={analyticsData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="date" /><YAxis /><Tooltip /><Legend />{["home", "about", "tribal", "children", "bibleDistribution", "gallery", "contact"].map((page, i) => <Line key={page} type="monotone" dataKey={page} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} />)}</LineChart></ResponsiveContainer></div>
         <div className="admin-chart-card"><h3>Chatbot Queries</h3><ResponsiveContainer width="100%" height={240}><BarChart data={analyticsData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="date" /><YAxis /><Tooltip /><Bar dataKey="chatbot" fill="#8B5CF6" radius={[4,4,0,0]} /></BarChart></ResponsiveContainer></div>
         <div className="admin-chart-card"><h3>Page Distribution</h3><ResponsiveContainer width="100%" height={240}><PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label>{pieData.map((entry, i) => <Cell key={entry.name} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer></div>
       </div>

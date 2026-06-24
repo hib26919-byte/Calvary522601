@@ -5,8 +5,6 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  orderBy,
-  query,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -15,7 +13,6 @@ import {
 import { db } from "../../lib/firebase";
 import { reoptimizeImageUrl, uploadToImgBB, validateImageFile } from "../../lib/imgbb";
 import {
-  DEFAULT_GALLERY_CATEGORIES,
   activeGalleryCategories,
   findGalleryCategory,
   galleryCategoryLabel,
@@ -61,36 +58,20 @@ export default function AdminGallery() {
     await Promise.all([fetchCategories(), fetchImages()]);
   }
 
-  async function seedDefaultCategories() {
-    await Promise.all(DEFAULT_GALLERY_CATEGORIES.map((category) => setDoc(
-      doc(db, "galleryCategories", category.id),
-      {
-        ...category,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      },
-      { merge: true }
-    )));
-  }
-
   async function fetchCategories() {
-    const q = query(collection(db, "galleryCategories"), orderBy("sortOrder", "asc"));
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      await seedDefaultCategories();
-      const seededSnap = await getDocs(q);
-      const seeded = seededSnap.docs.map((categoryDoc, index) => normalizeGalleryCategory({ id: categoryDoc.id, ...categoryDoc.data() }, index));
-      setCategories(sortGalleryCategories(seeded));
-      return;
-    }
+    const snap = await getDocs(collection(db, "galleryCategories"));
     const nextCategories = snap.docs.map((categoryDoc, index) => normalizeGalleryCategory({ id: categoryDoc.id, ...categoryDoc.data() }, index));
     setCategories(sortGalleryCategories(nextCategories));
   }
 
   async function fetchImages() {
-    const q = query(collection(db, "gallery"), orderBy("uploadedAt", "desc"));
-    const snap = await getDocs(q);
-    setImages(snap.docs.map((imageDoc) => ({ id: imageDoc.id, ...imageDoc.data() })));
+    const snap = await getDocs(collection(db, "gallery"));
+    const nextImages = snap.docs.map((imageDoc) => ({ id: imageDoc.id, ...imageDoc.data() }));
+    setImages(nextImages.sort((a, b) => {
+      const order = Number(a.order || 0) - Number(b.order || 0);
+      if (order !== 0) return order;
+      return String(b.uploadedAt?.seconds || "").localeCompare(String(a.uploadedAt?.seconds || ""));
+    }));
   }
 
   function getImageCategory(image) {
@@ -403,25 +384,31 @@ export default function AdminGallery() {
 
       <div className="admin-card">
         <h3 className="admin-card__title">Upload to Gallery Section</h3>
-        <div className="admin-form-grid">
-          <div className="admin-form-group">
-            <label>Category</label>
-            <select className="admin-select" value={uploadMeta.categoryId} onChange={(e) => setUploadMeta((p) => ({ ...p, categoryId: e.target.value }))}>
-              {activeCategories.map((cat) => <option key={cat.id} value={cat.id}>{cat.categoryName}</option>)}
-            </select>
-          </div>
+        {activeCategories.length === 0 ? (
+          <p style={{ color: "var(--color-text-muted)", margin: "12px 0" }}>
+            Add at least one active Gallery Category before uploading images.
+          </p>
+        ) : (
+          <div className="admin-form-grid">
+            <div className="admin-form-group">
+              <label>Category</label>
+              <select className="admin-select" value={uploadMeta.categoryId} onChange={(e) => setUploadMeta((p) => ({ ...p, categoryId: e.target.value }))}>
+                {activeCategories.map((cat) => <option key={cat.id} value={cat.id}>{cat.categoryName}</option>)}
+              </select>
+            </div>
           <div className="admin-form-group"><label>Caption English</label><input className="admin-input" value={uploadMeta.caption_en} onChange={(e) => setUploadMeta((p) => ({ ...p, caption_en: e.target.value }))} /></div>
           <div className="admin-form-group"><label>Caption Telugu</label><input className="admin-input" lang="te" value={uploadMeta.caption_te} onChange={(e) => setUploadMeta((p) => ({ ...p, caption_te: e.target.value }))} /></div>
           <div className="admin-form-group admin-form-group--full"><label>About Image English</label><textarea className="admin-textarea" rows={3} value={uploadMeta.about_en} onChange={(e) => setUploadMeta((p) => ({ ...p, about_en: e.target.value }))} /></div>
           <div className="admin-form-group admin-form-group--full"><label>About Image Telugu</label><textarea className="admin-textarea" rows={3} lang="te" value={uploadMeta.about_te} onChange={(e) => setUploadMeta((p) => ({ ...p, about_te: e.target.value }))} /></div>
-        </div>
+          </div>
+        )}
         <p style={{ color: "var(--color-text-muted)", margin: "12px 0" }}>Images are automatically optimized near 300 KB, converted to WebP when beneficial, and uploaded as optimized files.</p>
       </div>
 
-      <div className="admin-upload-zone" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); handleFileDrop(e.dataTransfer.files); }} onClick={() => document.getElementById("gallery-file-input").click()}>
+      <div className="admin-upload-zone" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); handleFileDrop(e.dataTransfer.files); }} onClick={() => activeCategories.length && document.getElementById("gallery-file-input").click()} aria-disabled={activeCategories.length === 0}>
         <input id="gallery-file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={(e) => handleFileDrop(e.target.files)} />
-        <strong>{uploading ? uploadProgress?.message || "Optimizing images..." : `Upload to ${galleryCategoryLabel(findGalleryCategory(categories, uploadMeta.categoryId) || activeCategories[0])}`}</strong>
-        <span>Drag and drop or click to browse</span>
+        <strong>{uploading ? uploadProgress?.message || "Optimizing images..." : activeCategories.length ? `Upload to ${galleryCategoryLabel(findGalleryCategory(categories, uploadMeta.categoryId) || activeCategories[0])}` : "Gallery categories required"}</strong>
+        <span>{activeCategories.length ? "Drag and drop or click to browse" : "Create an active category first"}</span>
         {uploadProgress && <progress value={uploadProgress.percent || 0} max="100" style={{ width: "min(320px, 100%)" }} />}
       </div>
 

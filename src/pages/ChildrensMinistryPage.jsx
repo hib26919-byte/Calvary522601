@@ -30,7 +30,7 @@ export default function ChildrensMinistryPage() {
         fallbackTone="children"
       />
       <ImpactStats />
-      <section className="section section--soft"><div className="container"><h2 className="section-title">{language === "te" ? "పిల్లల పరిచర్య ఫోటోలు" : "Children's Ministry Photos"}</h2><GalleryGrid category="children" /></div></section>
+      <section className="section section--soft"><div className="container"><h2 className="section-title">{language === "te" ? "పిల్లల పరిచర్య ఫోటోలు" : "Children's Ministry Photos"}</h2><GalleryGrid category={childrensPage?.galleryCategoryId} /></div></section>
     </main>
   );
 }

@@ -9,6 +9,7 @@ const SIDEBAR_LINKS = [
   { path: "/admin/dashboard", label: "Dashboard", icon: "▦" },
   { path: "/admin/pages", label: "Page Content", icon: "✎" },
   { path: "/admin/gallery", label: "Gallery", icon: "▧" },
+  { path: "/admin/bible-distribution", label: "Bible Distribution", icon: "B" },
   { path: "/admin/banner", label: "Festival Banners", icon: "★" },
   { path: "/admin/chatbot", label: "Chatbot Training", icon: "◌" },
   { path: "/admin/messages", label: "Messages", icon: "✉" },
@@ -20,7 +21,7 @@ const CHART_COLORS = ["#4B168C", "#8B5CF6", "#B83280", "#2FB7B2", "#A78BFA", "#3
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [analyticsData, setAnalyticsData] = useState([]);
-  const [stats, setStats] = useState({ gallery: 0, banners: 0 });
+  const [stats, setStats] = useState({ gallery: 0, bibleDistribution: 0, banners: 0 });
   const [notifications, setNotifications] = useState({ messages: 0 });
   const [notificationItems, setNotificationItems] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -41,6 +42,7 @@ export default function AdminDashboard() {
           about: value.pageViews?.about || 0,
           tribal: value.pageViews?.tribal || 0,
           children: value.pageViews?.children || 0,
+          bibleDistribution: value.pageViews?.bibleDistribution || 0,
           gallery: value.pageViews?.gallery || 0,
           contact: value.pageViews?.contact || 0,
           chatbot: value.chatbotQueries || 0,
@@ -54,8 +56,8 @@ export default function AdminDashboard() {
 
   async function fetchStats() {
     try {
-      const [gallerySnap, bannerSnap] = await Promise.all([getDocs(collection(db, "gallery")), getDocs(collection(db, "festivalBanners"))]);
-      setStats({ gallery: gallerySnap.size, banners: bannerSnap.docs.filter((d) => d.data().isActive).length });
+      const [gallerySnap, bibleSnap, bannerSnap] = await Promise.all([getDocs(collection(db, "gallery")), getDocs(collection(db, "bibleDistribution")), getDocs(collection(db, "festivalBanners"))]);
+      setStats({ gallery: gallerySnap.size, bibleDistribution: bibleSnap.size, banners: bannerSnap.docs.filter((d) => d.data().isActive).length });
     } catch {}
   }
 
@@ -83,7 +85,7 @@ export default function AdminDashboard() {
     fetchNotifications();
   }
 
-  const pieData = ["home", "about", "tribal", "children", "gallery", "contact"].map((name) => ({ name, value: analyticsData.reduce((s, d) => s + d[name], 0) }));
+  const pieData = ["home", "about", "tribal", "children", "bibleDistribution", "gallery", "contact"].map((name) => ({ name, value: analyticsData.reduce((s, d) => s + d[name], 0) }));
 
   async function handleLogout() {
     await logout();

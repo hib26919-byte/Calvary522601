@@ -1,7 +1,7 @@
 const IMGBB_API_KEY = "d3807d2bf0af64066b89b9dd40b453f3";
 const IMGBB_UPLOAD_URL = "https://api.imgbb.com/1/upload";
 
-export const IMAGE_UPLOAD_TARGET_BYTES = 300 * 1024;
+export const IMAGE_UPLOAD_TARGET_BYTES = 800 * 1024;
 
 const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
@@ -152,9 +152,27 @@ export async function compressImageFile(file, options = {}) {
   const bitmap = await createImageBitmap(file);
   const sourceLongestSide = Math.max(bitmap.width, bitmap.height);
   const preserveAlpha = ["image/png", "image/webp"].includes(file.type) && await hasTransparentPixels(bitmap);
-  const dimensions = [sourceLongestSide, 2400, 2200, 2000, 1800, 1600, 1400, 1200, 1000, 900, 800, 720, 640];
-  const qualities = [0.92, 0.88, 0.84, 0.8, 0.76, 0.72, 0.68, 0.64, 0.6, 0.56, 0.52];
+  
+  // Adaptive dimension selection:
+  // We preserve original dimensions unless the image is extremely large (> 2560px).
+  const MAX_WEBSITE_IMAGE_DIMENSION = 2560;
+  const startDimension = sourceLongestSide > MAX_WEBSITE_IMAGE_DIMENSION ? MAX_WEBSITE_IMAGE_DIMENSION : sourceLongestSide;
+  
+  const dimensions = [];
+  dimensions.push(startDimension);
+  
+  // Add standard downsizing options if startDimension is larger
+  const standardDims = [2400, 2000, 1600, 1200, 1000, 800, 640];
+  for (const dim of standardDims) {
+    if (dim < startDimension) {
+      dimensions.push(dim);
+    }
+  }
+
+  // Adaptive quality parameters to maintain sharp details near 800 KB target
+  const qualities = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70];
   const types = preserveAlpha ? ["image/webp", "image/png"] : ["image/webp", "image/jpeg"];
+  
   let smallestBlob = null;
   let previousCanvasSize = "";
   let attempts = 0;

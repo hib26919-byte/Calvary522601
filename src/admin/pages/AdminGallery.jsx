@@ -422,7 +422,7 @@ export default function AdminGallery() {
           const selectedCategory = getImageCategory(img);
           return (
             <div key={img.id} className="admin-gallery-item">
-              <img src={img.thumbURL || img.thumbUrl || img.imageURL} alt={img.caption_en || "Gallery"} loading="lazy" />
+              <img src={img.imageURL || img.url || img.thumbURL || img.thumbUrl} alt={img.caption_en || "Gallery"} loading="lazy" />
               <div className="admin-gallery-item__body">
                 <strong>{galleryCategoryLabel(selectedCategory) || img.categoryName || img.category || "Uncategorized"}</strong>
                 <p>{img.caption_en || "No caption"}</p>

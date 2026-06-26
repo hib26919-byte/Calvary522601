@@ -84,7 +84,7 @@ export default function BibleDistributionPage() {
                   >
                     <span className="bible-card-tile__frame">
                       <img
-                        src={entry.thumbURL || entry.thumbUrl || entry.imageURL}
+                        src={entry.imageURL || entry.url || entry.thumbURL || entry.thumbUrl}
                         alt={entry.description || "Bible distribution"}
                         loading="lazy"
                         decoding="async"

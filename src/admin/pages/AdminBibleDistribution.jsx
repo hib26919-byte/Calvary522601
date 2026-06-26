@@ -398,7 +398,7 @@ export default function AdminBibleDistribution() {
                       <td style={{ padding: 12, border: "1px solid #e5e1eb", verticalAlign: "middle" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
                           <img
-                            src={entry.thumbURL || entry.thumbUrl || entry.imageURL}
+                            src={entry.imageURL || entry.url || entry.thumbURL || entry.thumbUrl}
                             alt="Bible distribution preview"
                             style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 4, border: "1px solid #e5e1eb" }}
                           />

@@ -129,7 +129,7 @@ export default function SlideshowManager({
           <div className="slideshow-manager__empty">No slideshow images yet.</div>
         ) : items.map((item, index) => (
           <article className="slideshow-manager__item" key={`${item.url}-${index}`}>
-            <img src={item.thumbUrl || item.url} alt="" />
+            <img src={item.url || item.thumbUrl} alt="" />
             <div className="slideshow-manager__fields">
               <input className="admin-input" value={item.url} onChange={(e) => updateItem(index, "url", e.target.value)} placeholder="Image URL" />
               <input className="admin-input" value={item.alt_en} onChange={(e) => updateItem(index, "alt_en", e.target.value)} placeholder="Alt text English" />
